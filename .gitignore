@@ -1,0 +1,38 @@
+# Credentials and local configuration at every depth.
+**/.env
+**/.env.*
+!**/.env.example
+**/app.env
+**/app.*.env
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/.npmrc
+**/.netrc
+
+# Dependencies, compiled binaries, and local outputs.
+**/node_modules/
+**/vendor/
+**/bin/
+**/dist/
+**/coverage/
+**/coverage.out
+**/coverage.html
+**/*.test
+**/*.log
+**/output/
+**/tmp/
+**/temp/
+**/.tmp/
+
+# Workspace/editor/browser state; never import the source repo's history.
+**/.DS_Store
+**/.idea/
+**/.vscode/
+**/.playwright-cli/
+**/*.swp
+**/*.swo
+**/*~
+
+/witness

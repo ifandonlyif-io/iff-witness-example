@@ -1,0 +1,18 @@
+{
+  "id": "iff-unpaid-monitoring-fixture",
+  "label": "IFF unpaid monitoring fixture — live endpoint",
+  "url": "https://x402-fixture.ifandonlyif.io/paid-resource",
+  "payment_required": {
+    "x402Version": 2,
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "eip155:8453",
+        "asset": "0x1234567890abcdef1234567890abcdef12345678",
+        "amount": "1000",
+        "payTo": "0xabcdef1234567890abcdef1234567890abcdef12",
+        "maxTimeoutSeconds": 60
+      }
+    ]
+  }
+}

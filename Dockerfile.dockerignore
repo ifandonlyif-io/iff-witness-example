@@ -1,0 +1,38 @@
+# Dedicated build context for -f Dockerfile.
+# Default deny: runtime examples, credentials, worktree metadata, local outputs,
+# and unrelated product source must not enter the build context or its cache.
+**
+
+!go.mod
+!go.sum
+
+# Local package closure from go list -deps ./cmd/witness.
+!internal/prober/*.go
+!util/*.go
+!receipt/*.go
+!*.go
+!cmd/witness/*.go
+
+# The one committed, public, non-secret default fixture: baked in so the
+# image has a working default without a runtime volume mount. Other runtime
+# example files stay excluded per the default-deny above.
+!examples/iff-fixture.json
+
+# Browser build inputs, including the shared standalone receipt verifier.
+!web/service-receipt.mjs
+!package.json
+!package-lock.json
+!client/*.mjs
+!scripts/build.mjs
+
+# Exact current go:embed inputs; app.js is replaced by the browser build stage.
+!web/app.js
+!web/index.html
+!web/mark.svg
+!web/style.css
+!web/settings.html
+!web/settings.js
+
+# Keep test-only files out even when their source directory is allowlisted.
+**/*_test.go
+**/*.test.mjs

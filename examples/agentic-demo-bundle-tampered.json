@@ -1,0 +1,83 @@
+{
+  "schema": "iff-witness/bundle/v1",
+  "id": "a4c02653534bed22c419d70486b106d1",
+  "created_at": "2026-09-07T05:58:29.037119Z",
+  "mode": "rehearsal",
+  "scenario": "consistent",
+  "simulated": true,
+  "request": {
+    "url": "https://weather.witness.example/forecast",
+    "payment_required": {
+      "x402Version": 2,
+      "resource": {
+        "url": "https://weather.witness.example/forecast",
+        "description": "Simulated weather request",
+        "mimeType": "application/json"
+      },
+      "accepts": [
+        {
+          "scheme": "exact",
+          "network": "eip155:8453",
+          "amount": "1000",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "payTo": "0x1111111111111111111111111111111111111111",
+          "maxTimeoutSeconds": 60,
+          "extra": {
+            "name": "USD Coin",
+            "version": "2"
+          }
+        }
+      ]
+    },
+    "receipt": {
+      "version": "1",
+      "nonce": "witness_agentic-demo-1a07a725799"
+    }
+  },
+  "iff": {
+    "response": "{\"disclaimer\":\"Observed from public sources. Ownership not verified. Not an IFF-verified Evidence Card. Rehearsal only: simulated evidence signed by an ephemeral Witness demo key, not IFF production.\",\"history\":[],\"inclusion\":null,\"matches_last_observed\":true,\"observed\":{\"observed_at\":\"2026-09-07T05:58:29.037139Z\",\"option_fingerprints\":[\"45efc39c225fc6bf826388802a6e0d55c96daa5ea19435a7d8cbdc7b41eac3ee\"],\"probe_type\":\"simulated\",\"set_fingerprint\":\"e4a2e65792f9a8afc79df8cd2f2befa6c678ab4aaf784fd31040a01b44bdb845\",\"simulated\":true},\"ownership\":{\"status\":\"unverified\"},\"received\":{\"set_fingerprint\":\"e4a2e65792f9a8afc79df8cd2f2befa6c678ab4aaf784fd31040a01b44bdb845\",\"option_fingerprints\":[\"45efc39c225fc6bf826388802a6e0d55c96daa5ea19435a7d8cbdc7b41eac3ee\"]},\"service_receipt\":{\"schema\":\"https://ifandonlyif.io/schemas/service-receipt-v1.json\",\"payload\":\"eyJzY2hlbWEiOiJodHRwczovL2lmYW5kb25seWlmLmlvL3NjaGVtYXMvc2VydmljZS1yZWNlaXB0LXYxLmpzb24iLCJyZWNlaXB0X2lkIjoic3IxXzQxWlFfTm5EcXpVWkkwVVZNeEhjckZ6NyIsImlzc3VlciI6Imh0dHBzOi8vd2l0bmVzcy5leGFtcGxlIiwic2VydmljZSI6Ing0MDItcmVxdWlyZW1lbnQtdmVyaWZpY2F0aW9uIiwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wN1QwNTo1ODoyOS4wMzcxNTBaIiwiZXhwaXJlc19hdCI6IjIwMjYtMDktMDdUMDY6MDM6MjkuMDM3MTUwWiIsIm5vbmNlIjoid2l0bmVzc19hZ2VudGljLWRlbW8tMWEwN2E3MjU3OTkiLCJyZXF1ZXN0X3NoYTI1NiI6IjI4ZGY1ZWRiZDFmMmE1NDNkOGVkZjkzNjgyZTlkMDlkM2VjY2IxMWQ3MzVlYmVkZTM5MTA1ZTNmZDUzMWI3NjQiLCJzdWJqZWN0X21lZGlhX3R5cGUiOiJhcHBsaWNhdGlvbi9qc29uIiwic3ViamVjdF9zaGEyNTYiOiI4ZWEzMzM3YjMwZGI0YmE4ZWE5MzFhNTFmY2Y0NjNmODhhZGRkNTg0ZTM0NTMzZjEzZWNiMDQ2ZjRjNDFkYjVlIiwic3ViamVjdCI6ImV5SmthWE5qYkdGcGJXVnlJam9pVDJKelpYSjJaV1FnWm5KdmJTQndkV0pzYVdNZ2MyOTFjbU5sY3k0Z1QzZHVaWEp6YUdsd0lHNXZkQ0IyWlhKcFptbGxaQzRnVG05MElHRnVJRWxHUmkxMlpYSnBabWxsWkNCRmRtbGtaVzVqWlNCRFlYSmtMaUJTWldobFlYSnpZV3dnYjI1c2VUb2djMmx0ZFd4aGRHVmtJR1YyYVdSbGJtTmxJSE5wWjI1bFpDQmllU0JoYmlCbGNHaGxiV1Z5WVd3Z1YybDBibVZ6Y3lCa1pXMXZJR3RsZVN3Z2JtOTBJRWxHUmlCd2NtOWtkV04wYVc5dUxpSXNJbWhwYzNSdmNua2lPbHRkTENKcGJtTnNkWE5wYjI0aU9tNTFiR3dzSW0xaGRHTm9aWE5mYkdGemRGOXZZbk5sY25abFpDSTZkSEoxWlN3aWIySnpaWEoyWldRaU9uc2liMkp6WlhKMlpXUmZZWFFpT2lJeU1ESTJMVEE1TFRBM1ZEQTFPalU0T2pJNUxqQXpOekV6T1ZvaUxDSnZjSFJwYjI1ZlptbHVaMlZ5Y0hKcGJuUnpJanBiSWpRMVpXWmpNemxqTWpJMVptTTJZbVk0TWpZek9EZzRNREpoTm1Vd1pEVTFZemsyWkdGaE5XVmhNVGswTXpWaE4yUTRZMkprWXpkaU5ERmxZV016WldVaVhTd2ljSEp2WW1WZmRIbHdaU0k2SW5OcGJYVnNZWFJsWkNJc0luTmxkRjltYVc1blpYSndjbWx1ZENJNkltVTBZVEpsTmpVM09USm1PV0U0WVdaak56bGtaamhqWkRKbU1tSmxabUUyWXpZM09HRmlOR0ZoWmpjNE5HWmtNekV3TkRCaE1ERmlORFJpWkdJNE5EVWlMQ0p6YVcxMWJHRjBaV1FpT25SeWRXVjlMQ0p2ZDI1bGNuTm9hWEFpT25zaWMzUmhkSFZ6SWpvaWRXNTJaWEpwWm1sbFpDSjlMQ0p5WldObGFYWmxaQ0k2ZXlKelpYUmZabWx1WjJWeWNISnBiblFpT2lKbE5HRXlaVFkxTnpreVpqbGhPR0ZtWXpjNVpHWTRZMlF5WmpKaVpXWmhObU0yTnpoaFlqUmhZV1kzT0RSbVpETXhNRFF3WVRBeFlqUTBZbVJpT0RRMUlpd2liM0IwYVc5dVgyWnBibWRsY25CeWFXNTBjeUk2V3lJME5XVm1Zek01WXpJeU5XWmpObUptT0RJMk16ZzRPREF5WVRabE1HUTFOV001Tm1SaFlUVmxZVEU1TkRNMVlUZGtPR05pWkdNM1lqUXhaV0ZqTTJWbElsMTlMQ0p6YVcxMWJHRjBaV1FpT25SeWRXVXNJblJwWlhJaU9pSnZZbk5sY25abFpDSXNJblZ1YldGMFkyaGxaRjl5WldObGFYWmxaRjl2Y0hScGIyNXpJanBiWFN3aWRYSnNJam9pYUhSMGNITTZMeTkzWldGMGFHVnlMbmRwZEc1bGMzTXVaWGhoYlhCc1pTOW1iM0psWTJGemRDSXNJblpsY21ScFkzUWlPaUpqYjI1emFYTjBaVzUwSWl3aWQybHVaRzkzWDNObFkyOXVaSE1pT2pNd01IMCIsImV2aWRlbmNlIjpudWxsLCJjb21wdXRlX3Byb29mIjpudWxsfQ\",\"payload_sha256\":\"174003c8befd1e134fd4fe5e1407b347591cd1e2a467ee73fe8def062a7a9eed\",\"signature\":{\"algorithm\":\"Ed25519\",\"key_id\":\"sha256:77f7e346a31959e90354092a680198b117b0928daf6ea7459a387e85f554d64d\",\"public_key\":\"2bZ5PWp0of7MjDgd1rGxm44FRliZoxr2XPGlSbZaonw\",\"value\":\"egiWnPR2RVD-kCVIth1XlZH_8oIvW1oqJSgfsVoq-lTj36ehHV98opbxbPH4cI31mQZQXuLDHBCbjC7lhPM6Bg\"}},\"simulated\":true,\"tier\":\"observed\",\"unmatched_received_options\":[],\"url\":\"https://weather.witness.example/forecast\",\"verdict\":\"consistent\",\"window_seconds\":300}",
+    "request_projection": "{\"url\":\"https://weather.witness.example/forecast\",\"received\":{\"set_fingerprint\":\"e4a2e65792f9a8afc79df8cd2f2befa6c678ab4aaf784fd31040a01b44bdb845\",\"option_fingerprints\":[\"45efc39c225fc6bf826388802a6e0d55c96daa5ea19435a7d8cbdc7b41eac3ee\"]}}",
+    "key_directory": {
+      "enabled": true,
+      "issuer": "https://witness.example",
+      "keys": [
+        {
+          "algorithm": "Ed25519",
+          "key_id": "sha256:77f7e346a31959e90354092a680198b117b0928daf6ea7459a387e85f554d64d",
+          "public_key": "2bZ5PWp0of7MjDgd1rGxm44FRliZoxr2XPGlSbZaonw",
+          "purpose": "service-receipt-signing",
+          "status": "current"
+        }
+      ],
+      "schema": "https://ifandonlyif.io/schemas/service-receipt-key-directory-v1.json",
+      "simulated": true
+    },
+    "verification": {
+      "signature_valid": true,
+      "issuer_trusted": true,
+      "issuer_trust": "rehearsal",
+      "fresh": true,
+      "nonce_bound": true,
+      "request_bound": true,
+      "outer_bound": true,
+      "key_id": "sha256:77f7e346a31959e90354092a680198b117b0928daf6ea7459a387e85f554d64d"
+    }
+  },
+  "explanation": {
+    "source": "rehearsal",
+    "text": "演練中的付款要求與模擬觀測一致。這份收據由本機的臨時示範金鑰簽署，資料皆為模擬，尚未呼叫 0G。比對一致不能保證付款安全。（此處為示範竄改文字，簽署的原始回應並未改變）"
+  },
+  "compute": {
+    "status": "not_requested"
+  },
+  "agent": {
+    "proof": "0x433f76733d215ed42e9f2fa97200f507ac978724cedfb621efff95701b622c0979b6722ffbd182e4db6cd62f572b0e984a5efb0236401914e03691b8f7aa093c1b.eyJhZ2VudF9pZCI6IjEiLCJzdWJtaXR0ZXIiOiIweDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAiLCJ0aW1lc3RhbXAiOjE3ODg3NjA3MDQsImRlYWRsaW5lIjoyMTA0MTIwNzA5LCJ0YXNrX2hhc2giOiIweDU0MjJhNjE5ODgyY2IzZWI0MWIzODMxNDJkNTQ1MGQ0MTBlNjk1MTEwNDk0ODcxNWI0NzhkMmM3MTc2ZDkwYmEiLCJkYXRhX2hhc2hlcyI6WyIweGQ3MDQwOTgxZDA1ZWEzZjllOWUxNzM1MDcwNmE2MDViZWQ4ZThiNGMxMDIzMzhlMWE1ZDE4MDBhYzEzYjdlNTQiXSwiZnJhbWV3b3JrX2hhc2giOiIweDQ5NmYzNmY4MGE4MGFkMjIwMzVhNTYwNTJkZjZmNDg3MjZjNDZhMThiNTdkZmJhN2VlZWYwZWRkY2M3MTVhYjYifQ",
+    "transcript": {
+      "method": "POST",
+      "uri": "/api/check",
+      "status": 200,
+      "rawRequest": "{\"mode\":\"rehearsal\",\"scenario\":\"consistent\",\"nonce\":\"witness_agentic-demo-1a07a725799\"}",
+      "rawResponse": "{\"schema\":\"iff-witness/bundle/v1\",\"id\":\"a4c02653534bed22c419d70486b106d1\",\"created_at\":\"2026-09-07T05:58:29.037119Z\",\"mode\":\"rehearsal\",\"scenario\":\"consistent\",\"simulated\":true,\"request\":{\"url\":\"https://weather.witness.example/forecast\",\"payment_required\":{\"x402Version\":2,\"resource\":{\"url\":\"https://weather.witness.example/forecast\",\"description\":\"Simulated weather request\",\"mimeType\":\"application/json\"},\"accepts\":[{\"scheme\":\"exact\",\"network\":\"eip155:8453\",\"amount\":\"1000\",\"asset\":\"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913\",\"payTo\":\"0x1111111111111111111111111111111111111111\",\"maxTimeoutSeconds\":60,\"extra\":{\"name\":\"USD Coin\",\"version\":\"2\"}}]},\"receipt\":{\"version\":\"1\",\"nonce\":\"witness_agentic-demo-1a07a725799\"}},\"iff\":{\"response\":\"{\\\"disclaimer\\\":\\\"Observed from public sources. Ownership not verified. Not an IFF-verified Evidence Card. Rehearsal only: simulated evidence signed by an ephemeral Witness demo key, not IFF production.\\\",\\\"history\\\":[],\\\"inclusion\\\":null,\\\"matches_last_observed\\\":true,\\\"observed\\\":{\\\"observed_at\\\":\\\"2026-09-07T05:58:29.037139Z\\\",\\\"option_fingerprints\\\":[\\\"45efc39c225fc6bf826388802a6e0d55c96daa5ea19435a7d8cbdc7b41eac3ee\\\"],\\\"probe_type\\\":\\\"simulated\\\",\\\"set_fingerprint\\\":\\\"e4a2e65792f9a8afc79df8cd2f2befa6c678ab4aaf784fd31040a01b44bdb845\\\",\\\"simulated\\\":true},\\\"ownership\\\":{\\\"status\\\":\\\"unverified\\\"},\\\"received\\\":{\\\"set_fingerprint\\\":\\\"e4a2e65792f9a8afc79df8cd2f2befa6c678ab4aaf784fd31040a01b44bdb845\\\",\\\"option_fingerprints\\\":[\\\"45efc39c225fc6bf826388802a6e0d55c96daa5ea19435a7d8cbdc7b41eac3ee\\\"]},\\\"service_receipt\\\":{\\\"schema\\\":\\\"https://ifandonlyif.io/schemas/service-receipt-v1.json\\\",\\\"payload\\\":\\\"eyJzY2hlbWEiOiJodHRwczovL2lmYW5kb25seWlmLmlvL3NjaGVtYXMvc2VydmljZS1yZWNlaXB0LXYxLmpzb24iLCJyZWNlaXB0X2lkIjoic3IxXzQxWlFfTm5EcXpVWkkwVVZNeEhjckZ6NyIsImlzc3VlciI6Imh0dHBzOi8vd2l0bmVzcy5leGFtcGxlIiwic2VydmljZSI6Ing0MDItcmVxdWlyZW1lbnQtdmVyaWZpY2F0aW9uIiwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wN1QwNTo1ODoyOS4wMzcxNTBaIiwiZXhwaXJlc19hdCI6IjIwMjYtMDktMDdUMDY6MDM6MjkuMDM3MTUwWiIsIm5vbmNlIjoid2l0bmVzc19hZ2VudGljLWRlbW8tMWEwN2E3MjU3OTkiLCJyZXF1ZXN0X3NoYTI1NiI6IjI4ZGY1ZWRiZDFmMmE1NDNkOGVkZjkzNjgyZTlkMDlkM2VjY2IxMWQ3MzVlYmVkZTM5MTA1ZTNmZDUzMWI3NjQiLCJzdWJqZWN0X21lZGlhX3R5cGUiOiJhcHBsaWNhdGlvbi9qc29uIiwic3ViamVjdF9zaGEyNTYiOiI4ZWEzMzM3YjMwZGI0YmE4ZWE5MzFhNTFmY2Y0NjNmODhhZGRkNTg0ZTM0NTMzZjEzZWNiMDQ2ZjRjNDFkYjVlIiwic3ViamVjdCI6ImV5SmthWE5qYkdGcGJXVnlJam9pVDJKelpYSjJaV1FnWm5KdmJTQndkV0pzYVdNZ2MyOTFjbU5sY3k0Z1QzZHVaWEp6YUdsd0lHNXZkQ0IyWlhKcFptbGxaQzRnVG05MElHRnVJRWxHUmkxMlpYSnBabWxsWkNCRmRtbGtaVzVqWlNCRFlYSmtMaUJTWldobFlYSnpZV3dnYjI1c2VUb2djMmx0ZFd4aGRHVmtJR1YyYVdSbGJtTmxJSE5wWjI1bFpDQmllU0JoYmlCbGNHaGxiV1Z5WVd3Z1YybDBibVZ6Y3lCa1pXMXZJR3RsZVN3Z2JtOTBJRWxHUmlCd2NtOWtkV04wYVc5dUxpSXNJbWhwYzNSdmNua2lPbHRkTENKcGJtTnNkWE5wYjI0aU9tNTFiR3dzSW0xaGRHTm9aWE5mYkdGemRGOXZZbk5sY25abFpDSTZkSEoxWlN3aWIySnpaWEoyWldRaU9uc2liMkp6WlhKMlpXUmZZWFFpT2lJeU1ESTJMVEE1TFRBM1ZEQTFPalU0T2pJNUxqQXpOekV6T1ZvaUxDSnZjSFJwYjI1ZlptbHVaMlZ5Y0hKcGJuUnpJanBiSWpRMVpXWmpNemxqTWpJMVptTTJZbVk0TWpZek9EZzRNREpoTm1Vd1pEVTFZemsyWkdGaE5XVmhNVGswTXpWaE4yUTRZMkprWXpkaU5ERmxZV016WldVaVhTd2ljSEp2WW1WZmRIbHdaU0k2SW5OcGJYVnNZWFJsWkNJc0luTmxkRjltYVc1blpYSndjbWx1ZENJNkltVTBZVEpsTmpVM09USm1PV0U0WVdaak56bGtaamhqWkRKbU1tSmxabUUyWXpZM09HRmlOR0ZoWmpjNE5HWmtNekV3TkRCaE1ERmlORFJpWkdJNE5EVWlMQ0p6YVcxMWJHRjBaV1FpT25SeWRXVjlMQ0p2ZDI1bGNuTm9hWEFpT25zaWMzUmhkSFZ6SWpvaWRXNTJaWEpwWm1sbFpDSjlMQ0p5WldObGFYWmxaQ0k2ZXlKelpYUmZabWx1WjJWeWNISnBiblFpT2lKbE5HRXlaVFkxTnpreVpqbGhPR0ZtWXpjNVpHWTRZMlF5WmpKaVpXWmhObU0yTnpoaFlqUmhZV1kzT0RSbVpETXhNRFF3WVRBeFlqUTBZbVJpT0RRMUlpd2liM0IwYVc5dVgyWnBibWRsY25CeWFXNTBjeUk2V3lJME5XVm1Zek01WXpJeU5XWmpObUptT0RJMk16ZzRPREF5WVRabE1HUTFOV001Tm1SaFlUVmxZVEU1TkRNMVlUZGtPR05pWkdNM1lqUXhaV0ZqTTJWbElsMTlMQ0p6YVcxMWJHRjBaV1FpT25SeWRXVXNJblJwWlhJaU9pSnZZbk5sY25abFpDSXNJblZ1YldGMFkyaGxaRjl5WldObGFYWmxaRjl2Y0hScGIyNXpJanBiWFN3aWRYSnNJam9pYUhSMGNITTZMeTkzWldGMGFHVnlMbmRwZEc1bGMzTXVaWGhoYlhCc1pTOW1iM0psWTJGemRDSXNJblpsY21ScFkzUWlPaUpqYjI1emFYTjBaVzUwSWl3aWQybHVaRzkzWDNObFkyOXVaSE1pT2pNd01IMCIsImV2aWRlbmNlIjpudWxsLCJjb21wdXRlX3Byb29mIjpudWxsfQ\\\",\\\"payload_sha256\\\":\\\"174003c8befd1e134fd4fe5e1407b347591cd1e2a467ee73fe8def062a7a9eed\\\",\\\"signature\\\":{\\\"algorithm\\\":\\\"Ed25519\\\",\\\"key_id\\\":\\\"sha256:77f7e346a31959e90354092a680198b117b0928daf6ea7459a387e85f554d64d\\\",\\\"public_key\\\":\\\"2bZ5PWp0of7MjDgd1rGxm44FRliZoxr2XPGlSbZaonw\\\",\\\"value\\\":\\\"egiWnPR2RVD-kCVIth1XlZH_8oIvW1oqJSgfsVoq-lTj36ehHV98opbxbPH4cI31mQZQXuLDHBCbjC7lhPM6Bg\\\"}},\\\"simulated\\\":true,\\\"tier\\\":\\\"observed\\\",\\\"unmatched_received_options\\\":[],\\\"url\\\":\\\"https://weather.witness.example/forecast\\\",\\\"verdict\\\":\\\"consistent\\\",\\\"window_seconds\\\":300}\",\"request_projection\":\"{\\\"url\\\":\\\"https://weather.witness.example/forecast\\\",\\\"received\\\":{\\\"set_fingerprint\\\":\\\"e4a2e65792f9a8afc79df8cd2f2befa6c678ab4aaf784fd31040a01b44bdb845\\\",\\\"option_fingerprints\\\":[\\\"45efc39c225fc6bf826388802a6e0d55c96daa5ea19435a7d8cbdc7b41eac3ee\\\"]}}\",\"key_directory\":{\"enabled\":true,\"issuer\":\"https://witness.example\",\"keys\":[{\"algorithm\":\"Ed25519\",\"key_id\":\"sha256:77f7e346a31959e90354092a680198b117b0928daf6ea7459a387e85f554d64d\",\"public_key\":\"2bZ5PWp0of7MjDgd1rGxm44FRliZoxr2XPGlSbZaonw\",\"purpose\":\"service-receipt-signing\",\"status\":\"current\"}],\"schema\":\"https://ifandonlyif.io/schemas/service-receipt-key-directory-v1.json\",\"simulated\":true},\"verification\":{\"signature_valid\":true,\"issuer_trusted\":true,\"issuer_trust\":\"rehearsal\",\"fresh\":true,\"nonce_bound\":true,\"request_bound\":true,\"outer_bound\":true,\"key_id\":\"sha256:77f7e346a31959e90354092a680198b117b0928daf6ea7459a387e85f554d64d\"}},\"explanation\":{\"source\":\"rehearsal\",\"text\":\"演練中的付款要求與模擬觀測一致。這份收據由本機的臨時示範金鑰簽署，資料皆為模擬，尚未呼叫 0G。比對一致不能保證付款安全。\"},\"compute\":{\"status\":\"not_requested\"},\"agent\":null}\n"
+    }
+  }
+}

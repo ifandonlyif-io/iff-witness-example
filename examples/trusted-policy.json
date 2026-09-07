@@ -1,0 +1,9 @@
+{
+  "expectedIssuer": "https://ifandonlyif.io",
+  "trustedKeyIDs": ["sha256:0f872f79cd935ac2d764589c8283d35ae0ca02780faebee8862db85348fc5ceb"],
+  "agentic": {
+    "expectedSigner": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A",
+    "chainId": 16602,
+    "contractAddress": "0x2222222222222222222222222222222222222222"
+  }
+}

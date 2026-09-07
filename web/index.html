@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#152c48">
+  <meta name="description" content="IFF Witness：比較 x402 付款要求，解讀觀測證據，逐項核對簽章與內容。IFF Labs 實驗應用。">
+  <title>IFF Witness · 有憑據的查核</title>
+  <link rel="icon" href="/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <a href="#workspace" class="skip-link">跳到查核操作</a>
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="IFF Witness 首頁"><span class="brand-mark" aria-hidden="true">⇔</span><span>IFF <strong>Witness</strong></span><span class="labs-label">LABS</span></a>
+    <nav aria-label="外部連結"><a href="https://ifandonlyif.io" target="_blank" rel="noopener noreferrer">IFF 主站 <span aria-hidden="true">↗</span></a><a href="https://docs.0g.ai/developer-hub/building-on-0g/compute-network/router/features/verifiable-execution" target="_blank" rel="noopener noreferrer">0G 驗證文件 <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="workspace" class="workspace">
+    <div class="intro">
+      <div><p class="eyebrow">X402 EVIDENCE / AGENT SERVICE PROOF</p><h1>查核有依據，<span>解說有憑據。</span></h1><p class="intro-copy">比較付款要求與觀測證據，再核對這次查核留下的簽章。</p></div>
+      <div class="mode-control"><label for="mode">資料來源</label><select id="mode"><option value="rehearsal">演練資料</option><option value="live" disabled>真實 IFF + 0G（待設定）</option></select></div>
+      <div class="mode-control" id="live-password-row" hidden><label for="live-password">真實查核密碼</label><input id="live-password" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" maxlength="256" aria-describedby="live-password-help"><p id="live-password-help" class="fine-print">知道密碼才能執行真實 IFF + 0G 查核；密碼只留在這個分頁的記憶體裡，不會存起來。</p></div>
+    </div>
+    <div class="mode-notice" id="mode-notice" role="status"><span class="notice-dot" aria-hidden="true"></span><span id="mode-description">正在讀取應用設定…</span><span class="mode-tag" id="mode-tag">REHEARSAL</span></div>
+    <div class="error-notice" id="error" role="alert" hidden></div>
+    <div class="work-grid">
+      <div class="work-main">
+        <section class="panel compare-panel" aria-labelledby="compare-title">
+          <div class="panel-heading"><div><p class="step-caption">01 / 比較付款要求</p><h2 id="compare-title">這次要求，有哪裡不同？</h2></div><span class="protocol-chip">x402 v2</span></div>
+          <div class="endpoint-line"><span>Endpoint</span><code id="endpoint">讀取中</code></div>
+          <fieldset class="scenario-control"><legend>選擇測試情境</legend><label><input type="radio" name="scenario" value="consistent" checked><span>原始範例</span></label><label><input type="radio" name="scenario" value="payee_changed"><span>模擬更換收款地址</span></label></fieldset>
+          <div class="comparison" id="comparison">
+            <div class="comparison-column"><div class="column-heading"><span class="column-icon" aria-hidden="true">◈</span><h3 id="baseline-heading">演練觀測基準</h3></div><dl><div><dt>網路</dt><dd id="baseline-network">—</dd></div><div><dt>金額（最小單位）</dt><dd id="baseline-amount">—</dd></div><div class="payee-field"><dt>收款地址</dt><dd><code id="baseline-payee">—</code></dd></div></dl></div>
+            <div class="comparison-column submitted"><div class="column-heading"><span class="column-icon" aria-hidden="true">↳</span><h3>本次提交內容</h3><span class="change-marker" id="change-marker" hidden>已修改</span></div><dl><div><dt>網路</dt><dd id="submitted-network">—</dd></div><div><dt>金額（最小單位）</dt><dd id="submitted-amount">—</dd></div><div class="payee-field"><dt>收款地址</dt><dd><code id="submitted-payee">—</code></dd></div></dl></div>
+          </div>
+          <div class="run-row"><p id="scenario-note">演練只修改範例資料，不發送付款。</p><button class="button primary" id="run" disabled><span id="run-label">執行查核</span><span class="button-arrow" aria-hidden="true">↗</span></button></div>
+          <p class="run-status" id="run-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel explanation-panel" aria-labelledby="explanation-title">
+          <div class="panel-heading"><div><p class="step-caption">02 / 解讀證據</p><h2 id="explanation-title">這次查核的解說</h2></div><span class="source-chip" id="explanation-source">尚未產生</span></div>
+          <div id="explanation-empty" class="empty-state"><span class="empty-glyph" aria-hidden="true">“</span><p>先執行一次查核。<br><span>解說會引用查核結果；簽章與來源會分別驗證。</span></p></div>
+          <div id="explanation-result" hidden><div class="verdict-line"><span id="verdict" class="verdict">—</span><span id="verdict-detail"></span></div><p id="explanation-text" class="explanation-text"></p><p id="explanation-boundary" class="fine-print"></p><details><summary>查看這次引用的證據</summary><dl class="evidence-data"><div><dt>觀測時間</dt><dd id="observed-at">—</dd></div><div><dt>比較指紋</dt><dd><code id="received-fingerprint">—</code></dd></div><div><dt>模型</dt><dd id="model-name">未呼叫</dd></div><div><dt>推理狀態</dt><dd id="compute-status">—</dd></div><div id="compute-reason-row" hidden><dt>狀態說明</dt><dd id="compute-reason">—</dd></div><div id="router-tee-row" hidden><dt>Router 自報 TEE（未經簽章）</dt><dd id="router-tee">—</dd></div><div id="proof-signer-row" hidden><dt>供應商簽署者</dt><dd><code id="proof-signer">—</code></dd></div><div id="proof-provider-row" hidden><dt>供應商</dt><dd id="proof-provider">—</dd></div><div id="proof-chain-row" hidden><dt>鏈 ID／註冊合約</dt><dd><code id="proof-chain">—</code></dd></div><div id="proof-block-row" hidden><dt>註冊表讀取區塊高度</dt><dd id="proof-block">—</dd></div></dl></details></div>
+        </section>
+      </div>
+
+      <aside class="proof-panel" aria-labelledby="proof-title">
+        <div class="proof-heading"><p class="step-caption">03 / 核對憑據</p><h2 id="proof-title">驗證紀錄</h2><p>每項檢查，只代表它驗到的事。</p></div>
+        <div class="proof-status" id="proof-status">等待查核結果</div>
+        <ol id="checks" class="checks"><li class="check empty-check"><span class="check-symbol" aria-hidden="true">○</span><div><h3>IFF 收據</h3><p>簽章、簽署來源與內容</p></div></li><li class="check empty-check"><span class="check-symbol" aria-hidden="true">○</span><div><h3>0G 推理</h3><p>供應商簽章與輸出綁定</p></div></li><li class="check empty-check"><span class="check-symbol" aria-hidden="true">○</span><div><h3>Agent 身份</h3><p>另行接入 Agentic ID 後驗證</p></div></li></ol>
+        <div class="proof-actions"><button class="button secondary" id="download" disabled>下載證據包 <span aria-hidden="true">↓</span></button><button class="text-button" id="import-button">匯入證據包重新驗證 <span aria-hidden="true">↥</span></button><input type="file" id="import-file" accept="application/json,.json" class="visually-hidden" tabindex="-1" aria-label="匯入證據包"></div>
+        <p class="proof-note">檔案在瀏覽器內驗證。內嵌公鑰不等於可信身份；演練簽章也不代表正式 IFF。</p>
+        <p class="proof-note">也可以完全離線驗證，不需要信任這個網頁：下載後在終端機執行 <code>npm run verify -- bundle.json examples/trusted-policy.json</code>（範例信任政策見 <code>examples/trusted-policy.json</code>）。</p>
+      </aside>
+    </div>
+
+    <section class="tamper-panel" aria-labelledby="tamper-title"><div class="tamper-copy"><p class="step-caption">試著動一下證據</p><h2 id="tamper-title">如果有人換掉查核結果呢？</h2><p>修改副本的判定，保留原始收據，看看驗證器能否發現。</p></div><div class="tamper-actions"><button id="tamper" class="button danger-outline" disabled>修改判定並驗證 <span aria-hidden="true">↗</span></button><button id="restore" class="text-button" hidden>還原原始證據</button><p id="tamper-status" role="status" aria-live="polite"></p></div></section>
+    <details class="bundle-details"><summary>查看證據包原文</summary><pre id="bundle-json">尚未產生證據包。</pre></details>
+    <footer><p>IFF Labs · Witness</p><p>一致性只描述外部觀測；不代表付款安全或服務交付保證。</p><a class="footer-settings" href="/settings.html" target="_blank" rel="noopener noreferrer">金鑰與驗證設定 <span aria-hidden="true">↗</span><span class="visually-hidden">（另開分頁）</span></a></footer>
+  </main>
+</body>
+</html>

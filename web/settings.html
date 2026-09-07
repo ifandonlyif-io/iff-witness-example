@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#152c48">
+  <title>金鑰與驗證設定 · IFF Witness</title>
+  <link rel="icon" href="/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/settings.js"></script>
+</head>
+<body class="settings-page">
+  <a href="#settings-form" class="skip-link">跳到金鑰設定</a>
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="IFF Witness 首頁"><span class="brand-mark" aria-hidden="true">⇔</span><span>IFF <strong>Witness</strong></span><span class="labs-label">LABS</span></a>
+    <nav aria-label="頁面導覽"><a href="/">回到 Demo <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main class="workspace settings-workspace">
+    <div class="intro"><div><p class="eyebrow">LOCAL DEMO / KEYS &amp; VERIFICATION</p><h1>接上 0G。<span>核對 IFF。</span></h1><p class="intro-copy">只需要一把 0G 金鑰。IFF 指紋是選填的公開驗證資料，不用正式環境私鑰。</p></div></div>
+    <div id="settings-error" class="error-notice" role="alert" hidden></div>
+    <div class="settings-grid">
+      <div class="settings-main">
+      <section class="panel settings-panel" aria-labelledby="settings-title">
+        <div class="panel-heading"><div><p class="step-caption">必填 · 秘密金鑰</p><h2 id="settings-title">0G Router API 金鑰</h2></div><span class="protocol-chip">MAINNET</span></div>
+        <form id="settings-form" class="settings-form" autocomplete="off">
+          <label for="api-key">貼上金鑰</label>
+          <input id="api-key" name="api_key" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" maxlength="512" required disabled aria-describedby="key-help">
+          <p id="key-help" class="settings-help">用來呼叫 0G 模型，請使用有額度的 Demo 專用金鑰。不要填 IFF 的 JWT、簽章金鑰或錢包私鑰；已儲存的金鑰不會回填顯示。</p>
+          <div class="settings-form-actions"><button type="submit" id="save-key" class="button primary" disabled>儲存並啟用 <span aria-hidden="true">↗</span></button><button type="button" id="clear-key" class="text-button" disabled>清除本次金鑰</button></div>
+          <p id="settings-message" class="settings-message" role="status" aria-live="polite"></p>
+        </form>
+        <div class="settings-boundary"><h3>只保留在這次執行</h3><p>金鑰留在本機服務的記憶體，不寫入檔案或瀏覽器儲存空間，也不放進證據包。重新啟動後需重新填入；若原本以環境設定提供金鑰，重啟會恢復該設定。</p><p>儲存不會發送推理。回到 Demo 選擇「真實 IFF + 0G」並執行查核時，才會使用 0G 額度。清除或更換金鑰不會中止已送出的請求，也不會重設使用次數。</p></div>
+      </section>
+      <section class="panel settings-panel settings-public-panel" aria-labelledby="iff-settings-title">
+        <div class="panel-heading"><div><p class="step-caption">選填 · 公開資料</p><h2 id="iff-settings-title">IFF 收據公鑰指紋</h2></div><span class="protocol-chip">VERIFY</span></div>
+        <form id="iff-settings-form" class="settings-form" autocomplete="off">
+          <label for="iff-key-ids">你信任的收據簽署者</label>
+          <textarea id="iff-key-ids" name="iff_key_ids" rows="3" maxlength="1600" autocomplete="off" spellcheck="false" autocapitalize="none" disabled aria-describedby="iff-key-help iff-key-format" placeholder="sha256: 後接 64 個小寫十六進位字元"></textarea>
+          <p id="iff-key-help" class="settings-help">這不是第二把秘密金鑰。請向 IFF 管理者透過可信管道確認完整指紋，再貼到這裡；不要直接信任證據包自帶的指紋。</p>
+          <p id="iff-key-format" class="settings-help">格式：<code>sha256:</code> 加上 64 個小寫十六進位字元。每行一筆，或用逗號分隔，最多 16 筆。</p>
+          <div class="settings-form-actions"><button type="submit" id="save-iff-keys" class="button primary" disabled>儲存驗證指紋</button><button type="button" id="clear-iff-keys" class="text-button" disabled>清除驗證指紋</button></div>
+          <p id="iff-settings-message" class="settings-message" role="status" aria-live="polite"></p>
+        </form>
+        <div class="settings-boundary"><h3>留空，也能跑 Demo</h3><p>未設定時，服務端依設定的 IFF HTTPS 來源核對收據，但瀏覽器不會把簽署者標成已獨立信任。設定指紋只決定信任誰，不保證付款安全或服務交付。</p><p>儲存只更新驗證設定，不呼叫 0G、不改動 0G 金鑰。切回 Demo 會重新核對畫面上的證據；已開始的查核沿用開始時的指紋。指紋也只保留在這次執行，重啟會恢復原本的環境設定。</p></div>
+      </section>
+      </div>
+      <aside class="proof-panel settings-status-panel" aria-labelledby="connection-title">
+        <div class="proof-heading"><p class="step-caption">目前設定</p><h2 id="connection-title">開始前，確認一下。</h2></div>
+        <dl class="settings-status"><div><dt>0G 金鑰 · 必填</dt><dd id="key-state">讀取中…</dd></div><div><dt>IFF 驗證指紋 · 選填</dt><dd id="iff-key-state">—</dd></div><div><dt>範例</dt><dd id="example-state">—</dd></div><div><dt>模型</dt><dd><code id="settings-model">—</code></dd></div><div><dt>本次可再嘗試</dt><dd id="settings-budget">—</dd></div></dl>
+        <p class="proof-note">「已設定」不代表金鑰有效或仍有額度；實際結果以 0G 回應為準。</p>
+        <div class="settings-return"><a href="/" class="button secondary">回到 Demo <span aria-hidden="true">↗</span></a><p>也可以直接切回原分頁，設定狀態會自動更新。</p></div>
+      </aside>
+    </div>
+    <footer><p>IFF Labs · Witness</p><p>這個設定入口只開放本機；公開部署不接受網頁修改金鑰或驗證設定。</p></footer>
+  </main>
+</body>
+</html>

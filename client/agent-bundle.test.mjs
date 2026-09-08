@@ -8,11 +8,11 @@ const wallet = new Wallet('0x' + '11'.repeat(32));
 const options = { chainId: 16602, contractAddress: '0x' + '22'.repeat(20), expectedSigner: wallet.address, now: 1788600000 };
 const status = (result, id) => result.checks.find((item) => item.id === id)?.status;
 
-async function fixture({ omitAgent = false, responseRaw, transcriptOverrides = {} } = {}) {
-  const source = { schema: 'iff-witness/bundle/v1', mode: 'rehearsal', scenario: 'consistent', request: { receipt: { version: '1', nonce: 'test-request-1' } }, explanation: { source: 'rehearsal', text: 'Fixture answer.' }, agent: null };
+async function fixture({ omitAgent = false, mode = 'rehearsal', responseRaw, transcriptOverrides = {} } = {}) {
+  const source = { schema: 'iff-witness/bundle/v1', mode, scenario: 'consistent', request: { receipt: { version: '1', nonce: 'test-request-1' } }, explanation: { source: 'rehearsal', text: 'Fixture answer.' }, agent: null };
   if (omitAgent) delete source.agent;
   const rawResponse = responseRaw ?? JSON.stringify(source);
-  const transcript = { method: 'POST', uri: '/api/check', status: 200, rawRequest: '{"mode":"rehearsal","scenario":"consistent","nonce":"test-request-1"}', rawResponse, ...transcriptOverrides };
+  const transcript = { method: 'POST', uri: '/api/check', status: 200, rawRequest: JSON.stringify({ mode, scenario: 'consistent', nonce: 'test-request-1' }), rawResponse, ...transcriptOverrides };
   const taskHash = solidityPackedKeccak256(['string', 'string', 'bytes32', 'bytes32', 'string'], [transcript.method, transcript.uri, keccak256(toUtf8Bytes(transcript.rawRequest)), keccak256(toUtf8Bytes(transcript.rawResponse)), String(transcript.status)]);
   const proof = { agent_id: '33', submitter: '0x' + '00'.repeat(20), timestamp: options.now - 5, deadline: options.now + 3600, task_hash: taskHash, data_hashes: [], framework_hash: '0x' + '44'.repeat(32) };
   const digest = keccak256(AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address', 'uint256', 'uint256', 'uint256', 'bytes32', 'bytes32', 'bytes32'], [options.chainId, options.contractAddress, proof.submitter, proof.agent_id, proof.timestamp, proof.deadline, proof.task_hash, solidityPackedKeccak256(['bytes32[]'], [proof.data_hashes]), proof.framework_hash]));
@@ -28,6 +28,50 @@ test('unchanged signed bundle binds request, response and route with independent
     const result = verifyBundleAgent(bundle, options);
     for (const id of ['agentic-transcript', 'agentic-signature', 'agentic-bundle-route', 'agentic-bundle-request', 'agentic-bundle-response']) assert.equal(status(result, id), 'pass', id);
   }
+});
+
+test('optional API password preserves request binding and warns about shared credentials', async () => {
+  for (const mode of ['rehearsal', 'live']) {
+    for (const password of ['', 'test-only-passphrase']) {
+      const rawRequest = JSON.stringify({ mode, scenario: 'consistent', nonce: 'test-request-1', password });
+      const { bundle } = await fixture({ mode, transcriptOverrides: { rawRequest } });
+      for (const base64 of [false, true]) {
+        if (base64) {
+          bundle.agent.transcript.rawRequestBase64 = Buffer.from(rawRequest).toString('base64');
+          delete bundle.agent.transcript.rawRequest;
+        }
+        const before = JSON.stringify(bundle);
+        const result = verifyBundleAgent(bundle, options);
+        for (const id of ['agentic-transcript', 'agentic-signature', 'agentic-bundle-request', 'agentic-bundle-response']) assert.equal(status(result, id), 'pass', id);
+        assert.equal(status(result, 'agentic-bundle-credential'), password ? 'warning' : undefined);
+        if (password) assert.ok(!JSON.stringify(result.checks).includes(password), 'Checks must never repeat the password.');
+        assert.equal(JSON.stringify(bundle), before, 'Verification must not rewrite signed bytes.');
+      }
+    }
+  }
+});
+
+test('changing an optional password still invalidates the signed transcript', async () => {
+  const rawRequest = '{"mode":"live","scenario":"consistent","nonce":"test-request-1","password":"test-only-passphrase"}';
+  const { bundle } = await fixture({ mode: 'live', transcriptOverrides: { rawRequest } });
+  bundle.agent.transcript.rawRequest = rawRequest.replace('test-only-passphrase', 'changed-passphrase');
+  const result = verifyBundleAgent(bundle, options);
+  assert.equal(status(result, 'agentic-signature'), 'pass');
+  assert.equal(status(result, 'agentic-transcript'), 'fail');
+});
+
+test('password support does not admit unknown fields, mistyped passwords or altered check fields', async () => {
+  const request = { mode: 'live', scenario: 'consistent', nonce: 'test-request-1', password: 'test-only-passphrase' };
+  for (const extra of [{ url: 'https://unrequested.example/' }, { password: null }, { password: 42 }, { password: {} }, { nonce: 'wrong' }, { scenario: 'payee_changed' }, { mode: 'rehearsal' }]) {
+    const { bundle } = await fixture({ mode: 'live', transcriptOverrides: { rawRequest: JSON.stringify({ ...request, ...extra }) } });
+    const result = verifyBundleAgent(bundle, options);
+    assert.equal(status(result, 'agentic-signature'), 'pass');
+    assert.equal(status(result, 'agentic-transcript'), 'pass');
+    assert.equal(status(result, 'agentic-bundle-request'), 'fail');
+  }
+  const duplicate = JSON.stringify(request).replace('"password":', '"password":"first","password":');
+  const { bundle } = await fixture({ mode: 'live', transcriptOverrides: { rawRequest: duplicate } });
+  assert.equal(status(verifyBundleAgent(bundle, options), 'agentic-bundle-request'), 'fail');
 });
 
 test('altered outer explanation cannot retain a passing agent response binding', async () => {

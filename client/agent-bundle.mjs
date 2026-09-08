@@ -86,10 +86,18 @@ export function verifyBundleAgent(input, options = {}) {
     const request = document(transcriptText(transcript, 'rawRequest'));
     const expected = { mode: bundle.mode, scenario: bundle.scenario, nonce: bundle.request?.receipt?.nonce };
     if (Object.values(expected).some((value) => typeof value !== 'string' || value === '')) throw new Error('證據包未明確標示這次查核的 mode、scenario 與 nonce。');
-    const matches = canonical(request.node) === canonical(document(JSON.stringify(expected)).node);
+    // The API accepts an optional authentication-only password, which is not
+    // returned in the bundle. Omit only that field from the semantic comparison;
+    // verifyAgentProof still checks the signature over the untouched raw bytes.
+    const password = request.node.entries.find(({ key }) => key === 'password');
+    if (password && password.node.kind !== 'string') throw new Error('password 必須是字串。');
+    const projection = { ...request.node, entries: request.node.entries.filter(({ key }) => key !== 'password') };
+    const matches = canonical(projection) === canonical(document(JSON.stringify(expected)).node);
     checks.push(check('request', matches ? 'pass' : 'fail', 'Agent 請求與查核內容', matches
       ? '簽署的請求 JSON 與此證據包的 mode、scenario 及收據 nonce 相符。'
       : '簽署的請求與此證據包的 mode、scenario 或收據 nonce 不符。'));
+    if (password?.node.value) checks.push(check('credential', 'warning', 'Agent 原始請求含密碼',
+      '此原始 transcript 含查核密碼，請勿公開分享。刪除或遮蔽原始位元組會使簽章綁定失效。'));
   } catch (error) {
     checks.push(check('request', 'fail', 'Agent 請求與查核內容', error.message));
   }

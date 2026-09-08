@@ -44,6 +44,8 @@ go run ./cmd/witness
 
 Open [http://127.0.0.1:8094](http://127.0.0.1:8094). It starts in rehearsal mode — simulated observations, a real local Ed25519 demo signature, no outbound requests. To try real IFF + 0G, open the footer's key-settings link and paste a funded mainnet 0G Router key; see the technical docs below for the full environment variable list.
 
+The public endpoint fixture is included in the executable. No `.env` or example-file setup is needed for this quickstart; an explicit `WITNESS_EXAMPLE_FILE` overrides the included fixture.
+
 You don't need a key or a wallet to verify a real signed evidence bundle yourself:
 
 ```sh

@@ -60,6 +60,16 @@ Capture the header from the **actual sealed service response**, before parsing o
 
 For non-UTF-8 bytes, use `rawRequestBase64` / `rawResponseBase64` instead of the corresponding raw text field. Do not supply both forms. Empty bodies must be present as empty strings; omitted bytes cannot be verified. The verifier bounds each body to 2 MiB.
 
+`POST /api/check` accepts `mode`, `scenario`, `nonce`, and an optional string
+`password` for the shared live-mode gate. Bundle verification compares the first
+three fields with the displayed check and permits only that optional extra
+field; the signature still covers the entire original request, including the
+password. Unknown fields and changes to signed bytes remain invalid.
+**Do not publicly share a captured transcript containing a real password.** The
+verifier warns when it finds a nonempty password. Removing or redacting that
+field after signing invalidates the transcript; use a credential-free rehearsal
+for publicly shared test vectors.
+
 The official task digest is `keccak256(method || requestURI || keccak256(rawRequest) || keccak256(rawResponse) || decimalStatus)`. The EIP-191 signature covers the ABI encoding of the chain ID, identity registry, submitter, agent ID, timestamp, deadline, task digest, packed iData hash digest, and framework hash. The verifier follows [the current proxy implementation](https://github.com/0gfoundation/0g-agentic-id/blob/main/sealed/internal/proxy/proxy.go#L683-L819).
 
 Import and call the browser-compatible verifier:

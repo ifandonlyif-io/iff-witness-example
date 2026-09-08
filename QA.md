@@ -1,5 +1,13 @@
 # Witness MVP verification — 2026-09-05
 
+## Public example review fixes — 2026-09-08
+
+- All **45** JavaScript tests, browser build, `go test ./...`, `go test -race ./...`, `go vet ./...`, and `go build ./...` pass.
+- A compiled binary started from an empty temporary directory loads the embedded public fixture without `.env` or a runtime example file. Saving a deliberately fake Router key enables the live-mode selector; a rehearsal receipt verifies locally and consumes no inference budget. No funded inference was sent.
+- Actual local HTTP checks: 40 incorrect-password attempts from one IP produce six HTTP 403 responses followed by 34 HTTP 429 responses. Regression tests also cover missing passwords, global limits across different source IPs, window expiry, and unchanged inference budget.
+- Agent bundle tests accept the API's optional string password without changing original transcript bytes. Password edits still fail transcript verification; unknown fields, duplicate keys, and modified mode/scenario/nonce remain rejected. Nonempty captured passwords receive a sharing warning without being repeated in check details.
+- The committed normal AgenticID demo still exits 0 in the offline CLI; its tampered companion exits 1. Both remain test vectors, not live Sandbox proofs. This check did not deploy or change any existing hosted service.
+
 ## Passed
 
 - Full repository: `go test ./...`, `go build ./...`.

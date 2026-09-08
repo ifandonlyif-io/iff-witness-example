@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/subtle"
 	"embed"
 	"encoding/base64"
@@ -220,10 +221,10 @@ func (s *Server) serveConfig(w http.ResponseWriter, r *http.Request) {
 	state := s.runtimeSettingsState()
 	response := map[string]any{
 		"mode": "rehearsal", "compute_configured": state.computeConfigured, "example_configured": s.config.Example != nil,
-		"live_ready":              state.computeConfigured && s.config.Example != nil,
+		"live_ready":             state.computeConfigured && s.config.Example != nil,
 		"live_password_required": s.config.LivePassword != "",
 		"settings_available":     s.localSettingsAvailable(r),
-		"max_live_checks":    s.config.MaxLiveChecks, "remaining_live_checks": s.remainingLiveChecks(),
+		"max_live_checks":        s.config.MaxLiveChecks, "remaining_live_checks": s.remainingLiveChecks(),
 		"iff_origin": s.config.IFFOrigin, "model": s.config.Model, "examples": examples,
 		"mutation_pay_to": demoExample().MutationPayTo,
 		"demo_key_ids":    []string{s.signer.KeyID()}, "trusted_key_ids": state.iffKeyIDs,
@@ -261,6 +262,13 @@ func (s *Server) serveCheck(w http.ResponseWriter, r *http.Request) {
 		fail(w, http.StatusBadRequest, "invalid_request", "請選擇有效的模式與情境，並附上一個新的 nonce。")
 		return
 	}
+	// Count authentication attempts before comparing the shared live password.
+	// Rejected guesses must not bypass the per-IP/global request limits.
+	if !s.admit(r.RemoteAddr) {
+		w.Header().Set("Retry-After", "60")
+		fail(w, http.StatusTooManyRequests, "rate_limited", "查核次數已達上限，請稍候一分鐘再試。")
+		return
+	}
 	if request.Mode == "live" && s.config.LivePassword != "" && !validLivePassword(request.Password, s.config.LivePassword) {
 		fail(w, http.StatusForbidden, "invalid_password", "密碼不正確，無法使用真實查核。")
 		return
@@ -272,11 +280,6 @@ func (s *Server) serveCheck(w http.ResponseWriter, r *http.Request) {
 	}
 	if request.Mode == "live" && s.remainingLiveChecks() == 0 {
 		fail(w, http.StatusServiceUnavailable, "budget_exhausted", "本次啟動的 0G 推理次數已用完，請先檢查額度設定。")
-		return
-	}
-	if !s.admit(r.RemoteAddr) {
-		w.Header().Set("Retry-After", "60")
-		fail(w, http.StatusTooManyRequests, "rate_limited", "查核次數已達上限，請稍候一分鐘再試。")
 		return
 	}
 	select {
@@ -613,10 +616,12 @@ func (s *Server) fetch(ctx context.Context, method, target string, body []byte, 
 	return raw, resp.Header, nil
 }
 
-// validLivePassword runs in constant time so a wrong guess cannot be timed
-// against the configured password's length or contents.
+// Compare fixed-size digests so ConstantTimeCompare never exits early because
+// the supplied password and configured password have different lengths.
 func validLivePassword(candidate, configured string) bool {
-	return subtle.ConstantTimeCompare([]byte(candidate), []byte(configured)) == 1
+	candidateHash := sha256.Sum256([]byte(candidate))
+	configuredHash := sha256.Sum256([]byte(configured))
+	return subtle.ConstantTimeCompare(candidateHash[:], configuredHash[:]) == 1
 }
 
 // truncateForLog bounds a diagnostic log line so an oversized or malformed

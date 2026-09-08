@@ -3,6 +3,7 @@
 package witness
 
 import (
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"io"
@@ -14,10 +15,10 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
-	preflight "github.com/ifandonlyif-io/iff-x402-transparency/go"
 	"github.com/ifandonlyif-io/iff-witness-example/internal/prober"
 	"github.com/ifandonlyif-io/iff-witness-example/receipt"
 	"github.com/ifandonlyif-io/iff-witness-example/util"
+	preflight "github.com/ifandonlyif-io/iff-x402-transparency/go"
 )
 
 const (
@@ -32,6 +33,12 @@ const (
 	maxOutputTokens      = 600
 	defaultMaxLiveChecks = 30
 )
+
+// Keep the public default available to a fresh clone and a standalone binary,
+// independent of the caller's working directory. Explicit overrides fail closed.
+//
+//go:embed examples/iff-fixture.json
+var defaultExampleJSON []byte
 
 type Example struct {
 	ID              string          `json:"id"`
@@ -97,22 +104,26 @@ func ConfigFromEnv() (Config, error) {
 			config.TrustedKeyIDs = append(config.TrustedKeyIDs, value)
 		}
 	}
+	raw := defaultExampleJSON
 	if file := os.Getenv("WITNESS_EXAMPLE_FILE"); file != "" {
 		f, err := os.Open(file)
 		if err != nil {
 			return Config{}, errors.New("cannot open configured Witness example file")
 		}
 		defer f.Close()
-		raw, err := io.ReadAll(io.LimitReader(f, maxInputBytes+1))
-		if err != nil || len(raw) > maxInputBytes || receipt.ValidateUniqueJSON(raw) != nil {
+		raw, err = io.ReadAll(io.LimitReader(f, maxInputBytes+1))
+		if err != nil {
 			return Config{}, errors.New("Witness example file must contain bounded, unique-key JSON")
 		}
-		var example Example
-		if err := json.Unmarshal(raw, &example); err != nil {
-			return Config{}, errors.New("invalid Witness example file")
-		}
-		config.Example = &example
 	}
+	if len(raw) > maxInputBytes || receipt.ValidateUniqueJSON(raw) != nil {
+		return Config{}, errors.New("Witness example file must contain bounded, unique-key JSON")
+	}
+	var example Example
+	if err := json.Unmarshal(raw, &example); err != nil {
+		return Config{}, errors.New("invalid Witness example file")
+	}
+	config.Example = &example
 	return normalizeConfig(config)
 }
 

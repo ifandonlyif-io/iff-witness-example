@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -140,6 +141,72 @@ func TestWitnessLivePasswordGateAdmitsCorrectPasswordAndIgnoresItForRehearsal(t 
 	reached = false
 	if w := postWitness(s, `{"mode":"rehearsal","scenario":"consistent","nonce":"pw-not-needed"}`); w.Code != http.StatusOK || reached {
 		t.Fatalf("rehearsal mode must never require the live password: reached=%v %d: %s", reached, w.Code, w.Body.String())
+	}
+}
+
+func TestWitnessPasswordGuessesCountTowardIPAndGlobalLimits(t *testing.T) {
+	for _, perIP := range []bool{true, false} {
+		t.Run(fmt.Sprintf("per-IP=%t", perIP), func(t *testing.T) {
+			example := demoExample()
+			s, err := NewServer(Config{Example: &example, APIKey: "test-only-key", LivePassword: "test-passphrase"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			now := time.Now()
+			s.now = func() time.Time { return now }
+			s.client.Transport = witnessTransport(func(*http.Request) (*http.Response, error) {
+				t.Error("rejected password attempt reached an upstream service")
+				return nil, errors.New("unexpected external request")
+			})
+			limit := 20
+			if perIP {
+				limit = 6
+			}
+			attempt := func(i int) *httptest.ResponseRecorder {
+				body := `{"mode":"live","scenario":"consistent","nonce":"password-test"}`
+				if i%2 == 0 {
+					body = `{"mode":"live","scenario":"consistent","nonce":"password-test","password":"wrong"}`
+				}
+				r := httptest.NewRequest("POST", "http://127.0.0.1:8094/api/check", strings.NewReader(body))
+				r.Header.Set("Content-Type", "application/json")
+				ip := i + 1
+				if perIP {
+					ip = 1
+				}
+				r.RemoteAddr = fmt.Sprintf("192.0.2.%d:%d", ip, 10000+i)
+				w := httptest.NewRecorder()
+				s.Handler().ServeHTTP(w, r)
+				return w
+			}
+			for i := 0; i < limit+3; i++ {
+				w := attempt(i)
+				if i < limit {
+					if w.Code != http.StatusForbidden {
+						t.Fatalf("attempt %d: expected 403, got %d", i, w.Code)
+					}
+				} else if w.Code != http.StatusTooManyRequests || w.Header().Get("Retry-After") != "60" {
+					t.Fatalf("attempt %d bypassed rate limit: %d", i, w.Code)
+				}
+			}
+			if s.remainingLiveChecks() != defaultMaxLiveChecks {
+				t.Fatal("rejected password attempts consumed inference budget")
+			}
+			now = now.Add(time.Minute)
+			if w := attempt(0); w.Code != http.StatusForbidden {
+				t.Fatalf("rate window did not expire: %d", w.Code)
+			}
+		})
+	}
+}
+
+func TestWitnessLivePasswordComparison(t *testing.T) {
+	for _, candidate := range []string{"", "wrong", "secret-with-extra", "secreT", strings.Repeat("x", 1024)} {
+		if validLivePassword(candidate, "secret") {
+			t.Fatal("accepted an incorrect password")
+		}
+	}
+	if !validLivePassword("secret", "secret") {
+		t.Fatal("rejected a matching password")
 	}
 }
 

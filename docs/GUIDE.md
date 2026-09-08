@@ -18,7 +18,8 @@ go run ./cmd/witness
 Open **http://127.0.0.1:8094**, follow **金鑰與驗證設定**, and paste a funded
 0G mainnet Router key. The key remains only in the running process. Return to
 the demo, select **真實 IFF + 0G**, and run the check. The committed public
-fixture is selected automatically; no PostgreSQL, Redis, wallet, `.env`,
+fixture is embedded in the executable and selected automatically, even when
+the binary is launched outside the repository; no PostgreSQL, Redis, wallet, `.env`,
 Docker, or Node dependency install is required.
 
 The first run may download the selected Go toolchain and modules. Internet
@@ -67,7 +68,7 @@ Alternatively, create an untracked `.env` from `.env.example`, then supply:
 The example configuration already selects [IFF's public monitoring fixture](../examples/README.md). Its payment asset is synthetic, not USDC, and it processes no payment. The saved challenge is a historical capture; current availability and freshness are checked during a live run. For the included example, the only required new credential is your funded Router key.
 
 - `WITNESS_0G_API_KEY`: a funded 0G **mainnet Router** key. Enter it only through the supported direct-localhost settings tab or secure environment configuration, never a public page, committed file, or proof bundle. Do not reuse a production IFF secret.
-- `WITNESS_EXAMPLE_FILE`: an absolute path or a path relative to the repository root for one endpoint that already has a public IFF card and observed payment fingerprint.
+- Optional `WITNESS_EXAMPLE_FILE`: overrides the embedded public fixture with one endpoint that already has a public IFF card and observed payment fingerprint. Use an absolute path or a path relative to the process working directory (the repository root under `npm start`). An unreadable or invalid override stops startup; it never silently falls back to another endpoint.
 - Optional `WITNESS_IFF_KEY_IDS`: comma-separated full receipt-key fingerprints obtained through an independently trusted channel. Without pins, the server accepts keys recognized by the configured HTTPS IFF origin; the browser does not promote a bundled key directory into an independent trust anchor.
 - Optional `WITNESS_LIVE_PASSWORD`: a shared passphrase required (in the UI's own "真實查核密碼" field) for any `mode:"live"` check; rehearsal never requires it. Compared in constant time server-side. Unset by default — set it before making a deployment's live mode reachable by anyone who isn't supposed to spend its Router budget.
 
@@ -98,6 +99,8 @@ Restart the app and select **真實 IFF + 0G**. The server first reads the exist
 The default model ID is `0gm-1.0-35b-a3b`. `WITNESS_0G_MODEL` can select another compatible model, but the current integration requires `private` (TeeML) routing. The backend uses the official mainnet Router, `verify_tee: true`, no automatic retry/fallback, 600 output tokens, fixed price ceilings, a bounded input and timeout. Mainnet Compute and optional testnet AgenticID are separate environments with separate balances.
 
 `WITNESS_MAX_LIVE_CHECKS` defaults to **30 attempted inference calls per process** (allowed range 1–500). Failed Router attempts also count; rehearsal and a failed IFF check do not. The API exposes remaining calls. This counter resets when the process restarts and is not a durable billing budget. There are also per-IP/global minute limits and two concurrent checks. Set a key-level spending limit in the provider console before any public deployment.
+
+Validly shaped check requests, including missing or incorrect live-password attempts, share the limits of 6 per source IP and 20 globally per minute. Rate-limited requests return HTTP 429 with `Retry-After: 60`. Authentication failures never call IFF/0G or consume inference budget. A reverse proxy's connection address is used unless you provide a separately reviewed trusted-proxy design.
 
 No live request should be claimed until an actual funded call and its returned artifacts have been inspected. Missing proof, an omitted verification flag, failed signature checks and network errors are displayed distinctly; the application never substitutes simulated evidence for a live failure.
 

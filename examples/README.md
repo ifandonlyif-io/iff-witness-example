@@ -9,7 +9,9 @@ service.
 
 ## Use
 
-Set this in the local, untracked `.env`, then restart Witness:
+Witness embeds this public fixture and selects it by default. No `.env` is
+needed. To explicitly load the repository copy instead, set this in the local,
+untracked `.env` and restart with `npm start`:
 
 ```dotenv
 WITNESS_EXAMPLE_FILE=examples/iff-fixture.json

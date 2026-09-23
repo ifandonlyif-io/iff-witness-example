@@ -1,5 +1,18 @@
 # Witness MVP verification — 2026-09-05
 
+## Apostille integration example — 2026-09-23
+
+- The receiver view can generate a fresh downloadable signature/original pair and a changed-original challenge without prior guide steps. Chrome downloads were checked through the Go CLI (original exit 0; changed original exit 4), then imported through the in-app browser with the expected matching/mismatched results. Regeneration clears old selections and results; the 390 px download layout has no horizontal overflow. Chrome automation file selection needs the extension file-URL permission, so the import test used the in-app browser.
+
+- Guided UI: sign → append one space → restore, with actual byte-count feedback, expected tamper mismatch explained as a successful detection, download handoff and a separate recipient flow. Browser checks cover all three steps, preserved guide progress across mode switches, one/two-file readiness, changed originals, invalid bundle errors, the guide size limit, switching back to the built-in sample and clearing stale results. The 390 px guide shows its first action without horizontal overflow; the desktop result comparison was visually inspected. Technical details are progressively disclosed; trust limits remain visible.
+
+- All **52** JavaScript tests pass, including seven Apostille integration tests. The browser build checks the exact Core 0.1 release source and retains its full MIT notice. No dependency versions or existing evidence fixture bytes changed.
+- Browser walkthrough exercised real local Ed25519 signing, exact original matching, one-space tampering, restoration, recipient imports, and clearing stale results on file selection. The 390 px mobile layout has no horizontal overflow; the walkthrough produced no console errors/warnings.
+- A real Chrome download of the Apostille bundle passes the Go CLI against the original fixture. The changed-original CLI check exits 4; producer-only verification with an explicit receiver policy and `--require-trusted` exits 3. The fixture SHA-256 remains `9f86cadf8b54580aaf5a29df6863eaaf3c4670947010f060730a4fd7c5d1e818`.
+- Terminal tests verify after the signing process exits, refuse existing outputs, and export no private key files. File limits, modified envelopes, swapped delegation keys and mutable Node Buffer inputs are covered.
+- Both Witness repositories' container build inputs include the new source pin check, MIT license, public fixture and page assets. Local Docker build/run checks serve the standalone page and generated script.
+- Go build, tests, vet and race checks pass under this repository's documented scope. These pre-deployment checks perform no funded inference, paid transaction or hosted issuance. Identity trust, content truth and current authorization remain unestablished.
+
 ## Public example review fixes — 2026-09-08
 
 - All **45** JavaScript tests, browser build, `go test ./...`, `go test -race ./...`, `go vet ./...`, and `go build ./...` pass.

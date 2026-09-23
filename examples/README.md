@@ -61,3 +61,7 @@ controlled `payTo` mutation remain visibly distinct from an actual attack.
   self-signed AgenticID/X-Agent-Proof test vector (public deterministic key,
   no live sandbox). See
   [docs/GUIDE.md#agenticid--x-agent-proof-demo-offline-test-vector](../docs/GUIDE.md).
+
+## Apostille source-signature example
+
+[APOSTILLE.md](APOSTILLE.md) shows how to sign the exact Witness rehearsal file with Core 0.1, detect changed original bytes, and re-verify with Node or the released Go CLI. The original test fixture stays unchanged; the new signatures are local producer-only examples.

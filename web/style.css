@@ -12,3 +12,5 @@
 .footer-settings{padding:8px 12px;background:var(--white);border:1px solid #bccde3;border-radius:7px}.footer-settings:hover{background:#f5f8ff;text-decoration:none}
 @media(max-width:580px){.settings-page .masthead nav a:last-child{display:inline}}
 .settings-main{display:grid;gap:22px;min-width:0}.settings-public-panel .step-caption{color:var(--teal)}.settings-form textarea{display:block;width:100%;min-width:0;padding:13px 14px;font:.875rem/1.7 var(--mono);background:#f7fafc;border:1px solid #bccbda;border-radius:8px;color:var(--ink);resize:vertical;min-height:108px;overflow-wrap:anywhere}.settings-form textarea:disabled{opacity:.6}.settings-form textarea::placeholder{font-family:var(--body);color:var(--muted)}.settings-help code{overflow-wrap:anywhere}.settings-status-panel{min-width:0}
+
+.witness-home .masthead{flex-wrap:wrap}

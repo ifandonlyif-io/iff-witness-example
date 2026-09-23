@@ -4,7 +4,8 @@ WORKDIR /src
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY client ./client
-COPY scripts/build.mjs ./scripts/build.mjs
+COPY scripts/build.mjs scripts/check-apostille-source.mjs ./scripts/
+COPY examples/agentic-demo-bundle.json ./examples/agentic-demo-bundle.json
 COPY web/service-receipt.mjs ./web/service-receipt.mjs
 RUN npm run build
 
@@ -14,7 +15,7 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-COPY --from=browser /src/web/app.js /src/web/settings.js ./web/
+COPY --from=browser /src/web/app.js /src/web/settings.js /src/web/apostille-demo.js ./web/
 RUN CGO_ENABLED=0 go build -trimpath -o /witness ./cmd/witness
 
 FROM alpine:3.24.1

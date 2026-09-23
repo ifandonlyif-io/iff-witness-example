@@ -7,7 +7,8 @@
     "build": "node scripts/build.mjs",
     "test": "node --test client/*.test.mjs agentic/*.test.mjs",
     "start": "node --env-file-if-exists=.env scripts/start.mjs",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "apostille": "node scripts/apostille.mjs"
   },
   "dependencies": { "ethers": "6.17.0" },
   "devDependencies": { "esbuild": "0.28.2" }

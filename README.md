@@ -8,6 +8,14 @@ Run Witness on your laptop to compare an x402 payment requirement with [IFF](htt
 
 **Start locally. No deployment, API key, wallet, database, Docker, or Node.js installation is needed for the rehearsal demo.**
 
+## Apostille example: sign the evidence file
+
+**[Try the hosted Apostille example](https://iff-witness-production.up.railway.app/apostille.html)** — no installation required. Generate a matching test-file pair in your browser, download it, and check the original or a deliberately changed copy.
+
+Open **[the local Apostille example](http://127.0.0.1:8094/apostille.html)** after starting Witness. Create a real local source signature over the bundled rehearsal file or your own saved Witness bundle, add one space to the original, and see original-file verification fail while the signature remains valid. Download both files and verify them again without the signing keys.
+
+No account, API key, wallet, hosted issuance or 0G credits are needed. Results remain `producer_only` with unknown issuer trust; this does not upgrade any inner IFF/0G/AgenticID evidence. See the [browser and terminal walkthrough](examples/APOSTILLE.md).
+
 ## 1. Install the prerequisites
 
 | Tool | When you need it | Installation |

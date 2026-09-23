@@ -1,0 +1,19 @@
+{
+  "repository": "https://github.com/ifandonlyif-io/iff-apostille",
+  "tag": "v0.1.0-alpha.1",
+  "commit": "d2c72c8b323a4bcd8f107c1b917209fecccbde0f",
+  "files": {
+    "apostille-core.mjs": {
+      "source": "web/apostille-core.mjs",
+      "sha256": "2b6adc95c2f49eebd9ec4bbba8791245b86c3f51878eb85805c5f19135e3208a"
+    },
+    "apostille-json.mjs": {
+      "source": "web/apostille-json.mjs",
+      "sha256": "e2808409e4d61b01f5dc0d146c6e7ebf0379ac564365d97fac20c1b7447e924b"
+    },
+    "LICENSE": {
+      "source": "LICENSE",
+      "sha256": "8af338d6c97d430b5285a9e6a3ff041fd745dc01c3bb1e2896bf20fbbec65ff7"
+    }
+  }
+}

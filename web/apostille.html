@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#152c48">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="跟著三個步驟測試 Apostille：簽署 Witness 範例、修改一個空白、還原原件，親自看懂來源簽章。">
+  <title>Apostille 範例 · IFF Witness</title>
+  <link rel="icon" href="/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/apostille-demo.css">
+  <script type="module" src="/apostille-demo.js"></script>
+</head>
+<body class="apostille-demo">
+  <a href="#workspace" class="skip-link">跳到測試操作</a>
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="IFF Witness 首頁"><span class="brand-mark" aria-hidden="true">⇔</span><span>IFF <strong>Witness</strong></span><span class="labs-label">LABS</span></a>
+    <nav aria-label="範例導覽"><a href="/">回到 Witness</a><a href="https://github.com/ifandonlyif-io/iff-witness-example" target="_blank" rel="noopener noreferrer">範例原始碼 ↗</a></nav>
+  </header>
+  <main id="workspace" class="workspace ap-workspace" tabindex="-1">
+    <section class="ap-intro" aria-labelledby="ap-title">
+      <p class="eyebrow">WITNESS × APOSTILLE / 互動練習</p>
+      <h1 id="ap-title">親手驗一次，<span>看懂來源簽章。</span></h1>
+      <p class="intro-copy">檔案多了一個空白，還驗得過嗎？跟著做三步，看看簽章如何發現差異。</p>
+      <p class="ap-local-note">約 1 分鐘 · 已備妥範例檔案 · 全程在你的瀏覽器內完成</p>
+    </section>
+    <div class="ap-mode-switch" role="group" aria-label="選擇操作方式">
+      <button id="ap-mode-demo" aria-pressed="true">跟著做一次</button>
+      <button id="ap-mode-import" aria-pressed="false">查驗收到的檔案</button>
+    </div>
+    <noscript><p class="error-notice">請啟用 JavaScript，或使用頁面下方的 Node.js 離線操作指引。</p></noscript>
+    <ol class="ap-steps" id="ap-steps" aria-label="測試進度">
+      <li aria-current="step"><span class="ap-step-number" aria-hidden="true">1</span><span>簽署範例<small id="ap-step-state-0">目前步驟</small></span></li>
+      <li><span class="ap-step-number" aria-hidden="true">2</span><span>改動原件<small id="ap-step-state-1">接著做</small></span></li>
+      <li><span class="ap-step-number" aria-hidden="true">3</span><span>還原確認<small id="ap-step-state-2">最後做</small></span></li>
+    </ol>
+    <section class="panel ap-lab" aria-label="Apostille 測試工作區" id="ap-lab">
+      <div id="ap-guide" class="ap-guide">
+        <div class="ap-guide-heading"><p class="step-caption" id="ap-stage-label">第 1 步 / 簽署</p><span id="ap-progress">已完成 0 / 3</span></div>
+        <h2 id="ap-step-title">先替一份檔案加上來源簽章</h2>
+        <p id="ap-step-copy">我們準備了一份 Witness 演練證據包。按下按鈕，就會用臨時金鑰簽署，再立即核對。</p>
+        <div class="ap-feedback" id="ap-feedback" hidden><strong id="ap-feedback-title"></strong><p id="ap-feedback-copy"></p></div>
+        <div class="ap-next-row"><button class="button primary" id="ap-next">簽署範例檔案 →</button><button class="text-button" id="ap-reset" hidden>重新開始</button></div>
+        <p class="ap-expect" id="ap-expect">你會看到：簽章有效，而且原件相符。</p>
+        <details class="ap-source-options" id="ap-source-options"><summary>換成自己的 Witness 檔案（選填）</summary><label for="ap-source">原件需小於 1 MiB，預留一個空白的測試空間</label><input id="ap-source" type="file" accept="application/json,.json"><p class="ap-note">檔案不會上傳。每次重新簽署都使用新的示範金鑰。</p><button class="text-button" id="ap-use-sample" hidden>改用內建範例</button></details>
+      </div>
+      <div id="ap-receiver" class="ap-guide" hidden>
+        <p class="step-caption">接收者 / 離線查驗</p><h2>準備好一組對應的檔案</h2>
+        <p>選擇簽章檔與它對應的原件。查驗不需要簽署者的私鑰，也不會上傳檔案。</p>
+        <section class="ap-kit" aria-labelledby="ap-kit-title">
+          <h3 id="ap-kit-title">還沒有檔案？這裡幫你準備。</h3>
+          <p>用公開的 Witness 演練資料，產生一組可配對查驗的測試檔案。不需帳號或 API key，金鑰只用於這次本機簽署。</p>
+          <button class="button secondary" id="ap-kit-generate">產生一組測試檔案</button>
+          <p class="ap-kit-status" id="ap-kit-status" role="status">產生後，先下載簽章檔和原件，再用下方兩個欄位選取它們。</p>
+          <div id="ap-kit-ready" hidden>
+            <p class="ap-kit-id" id="ap-kit-id"></p>
+            <div class="ap-kit-files">
+              <div><div><strong>1. 簽章檔</strong><code id="ap-kit-bundle-name"></code><span>記錄原件的雜湊、大小與來源簽章。</span></div><button class="button secondary" id="ap-kit-download-bundle">下載簽章檔 ↓</button></div>
+              <div><div><strong>2. 原件</strong><code id="ap-kit-original-name"></code><span>與上面的簽章配對，預期兩項查驗都通過。</span></div><button class="button secondary" id="ap-kit-download-original">下載原件 ↓</button></div>
+            </div>
+            <p class="ap-kit-next"><strong>下載後怎麼做？</strong>在下方「1. Apostille 簽章檔」選簽章檔，「2. 對應原件」選原件，再按「查驗這兩份檔案」。</p>
+            <button class="text-button" id="ap-kit-choose">下一步：選擇下載的檔案 ↓</button>
+            <details class="ap-kit-challenge"><summary>再挑戰：測試「原件不符」</summary><p>下載下方改動版，它比原件多一個空白。保留同一份簽章，只把「2. 對應原件」換成改動版再查驗。</p><code id="ap-kit-changed-name"></code><button class="button danger-outline" id="ap-kit-download-changed">下載改動版原件 ↓</button><p>預期結果：簽章仍有效、原件不符。這代表成功抓到差異。</p></details>
+          </div>
+        </section>
+        <div class="ap-file-grid" id="ap-receiver-files">
+          <div><label for="ap-bundle-file"><strong>1. Apostille 簽章檔</strong><span>通常叫 apostille-bundle.json · 最多 256 KiB</span></label><input id="ap-bundle-file" type="file" accept="application/json,.json"></div>
+          <div><label for="ap-original-file"><strong>2. 對應原件</strong><span>例如 witness-original.json · 最多 1 MiB</span></label><input id="ap-original-file" type="file" accept="application/json,.json"></div>
+        </div>
+        <div class="ap-next-row"><button class="button primary" id="ap-import" disabled>查驗這兩份檔案 →</button><p class="ap-note" id="ap-files-ready">請先選擇兩份檔案（0 / 2）。</p></div>
+      </div>
+      <div class="ap-error" id="ap-error" role="alert" hidden><strong id="ap-error-title"></strong><details><summary>查看錯誤細節</summary><p id="ap-error-detail"></p></details></div>
+      <div class="ap-bench">
+        <div class="ap-document">
+          <div class="ap-document-label"><span aria-hidden="true">▤</span><p class="step-caption">這次查驗的原件</p><span class="ap-change-badge" id="ap-change-badge" hidden>+1 byte</span></div>
+          <h3 id="ap-record-name">Witness 演練證據包</h3><p class="ap-file-description" id="ap-file-description">已準備好公開範例，不需另外找檔案。</p>
+          <dl class="ap-file-size"><div><dt>簽署時</dt><dd id="ap-signed-size">尚未簽署</dd></div><div><dt>目前檔案</dt><dd id="ap-size">準備就緒</dd></div></dl>
+          <div class="ap-byte-view" id="ap-byte-view" hidden><p>檔案結尾 <span>↵ 換行 · ␠ 空白</span></p><code id="ap-tail"></code><mark id="ap-added-space" hidden>␠</mark></div>
+        </div>
+        <section class="ap-result" id="ap-result" aria-labelledby="ap-result-title" data-status="waiting">
+          <h3 id="ap-result-title">分開看這兩項結果</h3>
+          <div class="ap-check" id="ap-signature-check"><span class="ap-check-icon" id="ap-signature-icon" aria-hidden="true">—</span><div><h4>簽章有沒有被改動？</h4><p id="ap-signature">簽署後，會核對簽章與金鑰綁定。</p></div></div>
+          <div class="ap-check" id="ap-match-check"><span class="ap-check-icon" id="ap-match-icon" aria-hidden="true">—</span><div><h4>手上的檔案還是原件嗎？</h4><p id="ap-match">簽署後，會比對檔案的雜湊與大小。</p></div></div>
+          <p class="ap-message" id="ap-message" role="status" aria-live="polite">先按「簽署範例檔案」，開始第一步。</p>
+        </section>
+      </div>
+      <p class="ap-trust-note">這裡驗的是簽章與檔案綁定。簽署者的組織身分、內容是否屬實，以及目前是否仍獲授權，都尚未由此建立。</p>
+    </section>
+    <section class="ap-handoff" id="ap-handoff" aria-labelledby="ap-handoff-title" hidden>
+      <div><p class="step-caption">練習完成 / 試著交給另一個人</p><h2 id="ap-handoff-title" tabindex="-1">下載兩份檔案，就能再次查驗。</h2><p>把原件與簽章檔一起交付。接收者可用本頁的「查驗收到的檔案」，或 Apostille CLI 離線核對。</p></div>
+      <div class="ap-downloads"><button class="button secondary" id="ap-download-original">下載原件 ↓</button><button class="button secondary" id="ap-download-bundle">下載簽章檔 ↓</button></div>
+      <p class="ap-note" id="ap-download-note" role="status">需要兩份檔案；簽章檔不包含原件或私鑰。</p>
+      <button class="text-button" id="ap-open-receiver">我已準備好檔案，前往接收者查驗 →</button>
+    </section>
+    <details class="ap-technical" id="ap-technical" hidden><summary>查看技術細節：雜湊、公鑰與驗證範圍</summary><dl>
+      <div><dt>原件 SHA-256</dt><dd><code id="ap-digest"></code></dd></div><div><dt>Agent 公鑰指紋</dt><dd><code id="ap-key"></code></dd></div>
+      <div><dt>證書範圍</dt><dd id="ap-scope"></dd></div><div><dt>Issuer 信任</dt><dd id="ap-trust"></dd></div><div><dt>Agent 授權關係</dt><dd id="ap-agent"></dd></div><div><dt>內容真實性</dt><dd id="ap-truth"></dd></div><div><dt>時間／撤銷</dt><dd id="ap-freshness"></dd></div>
+    </dl><p>查驗以檔案內的公鑰核對簽章，但不會把它當成可信身分。信任 issuer 需要獨立取得的完整 issuer/key pin 與接收政策。</p></details>
+    <section class="ap-notes" aria-label="範例說明">
+      <details><summary>這個範例使用什麼資料與金鑰？</summary><p>內建檔案是公開的 Witness 演練資料，包含 self-signed AgenticID 測試證據；不是新取得的 IFF 觀測或實際 0G 呼叫。簽署使用臨時管理員與 agent 金鑰，私鑰不保存、不下載，也沒有託管 issuer 證書。</p><p>Apostille 不會提升內層 IFF／0G／AgenticID 證據的驗證狀態。請回 Witness 分別查驗；這份簽章不建立付款安全或服務交付保證。</p></details>
+      <details><summary>也想在終端機測試？</summary><p>在 Witness 專案目錄使用 Node.js 22.9.0 以上版本：</p><pre><code>npm run apostille -- demo my-apostille-demo
+npm run apostille -- verify my-apostille-demo/apostille-bundle.json my-apostille-demo/witness-original.json</code></pre><a href="https://github.com/ifandonlyif-io/iff-witness-example/blob/main/examples/APOSTILLE.md" target="_blank" rel="noopener noreferrer">完整指引與 Go CLI 查驗方式 ↗</a></details>
+    </section>
+    <footer><p>IFF Labs · Witness × Apostille</p><a href="https://github.com/ifandonlyif-io/iff-apostille" target="_blank" rel="noopener noreferrer">Apostille Core 0.1 · MIT ↗</a><a href="/">回到 Witness</a></footer>
+  </main>
+</body>
+</html>

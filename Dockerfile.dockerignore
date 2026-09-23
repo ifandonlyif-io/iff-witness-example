@@ -13,10 +13,11 @@
 !*.go
 !cmd/witness/*.go
 
-# The one committed, public, non-secret default fixture: baked in so the
-# image has a working default without a runtime volume mount. Other runtime
+# Committed public, non-secret fixtures: the default receipt and the
+# Apostille walkthrough original. Other runtime
 # example files stay excluded per the default-deny above.
 !examples/iff-fixture.json
+!examples/agentic-demo-bundle.json
 
 # Browser build inputs, including the shared standalone receipt verifier.
 !web/service-receipt.mjs
@@ -24,6 +25,10 @@
 !package-lock.json
 !client/*.mjs
 !scripts/build.mjs
+!scripts/check-apostille-source.mjs
+!client/third-party/apostille/*.mjs
+!client/third-party/apostille/LICENSE
+!client/third-party/apostille/SOURCE.json
 
 # Exact current go:embed inputs; app.js is replaced by the browser build stage.
 !web/app.js
@@ -32,6 +37,9 @@
 !web/style.css
 !web/settings.html
 !web/settings.js
+!web/apostille.html
+!web/apostille-demo.css
+!web/apostille-demo.js
 
 # Keep test-only files out even when their source directory is allowlisted.
 **/*_test.go

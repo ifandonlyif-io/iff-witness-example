@@ -8,6 +8,14 @@
 
 **先在本機跑起來就好。演練不需要部署、API key、錢包、資料庫、Docker，也不用安裝 Node.js。**
 
+## Apostille 範例：替證據包加上來源簽章
+
+**[直接試用線上 Apostille 範例](https://iff-witness-production.up.railway.app/apostille.html)**，不用安裝。可在瀏覽器產生一組對應的測試檔案，下載後查驗原件，或換成刻意修改的檔案觀察差異。
+
+啟動 Witness 後，開啟 **[本機 Apostille 範例](http://127.0.0.1:8094/apostille.html)**。用內建演練資料或自己的 Witness 檔案建立本機簽章，在原件加一個空白，觀察「簽章仍有效、原件比對不符」，再下載兩份檔案交給另一個人離線查驗。
+
+不需帳號、API key、錢包、託管簽發或 0G 額度。結果維持 `producer_only`、issuer 信任未知，也不會提升內層 IFF／0G／AgenticID 證據的驗證狀態。詳見[網頁與命令列操作指引](examples/APOSTILLE.md)。
+
 ## 1. 安裝必要工具
 
 | 工具 | 什麼時候需要 | 安裝方式 |

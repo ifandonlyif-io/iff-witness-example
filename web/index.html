@@ -10,11 +10,11 @@
   <link rel="stylesheet" href="/style.css">
   <script type="module" src="/app.js"></script>
 </head>
-<body>
+<body class="witness-home">
   <a href="#workspace" class="skip-link">跳到查核操作</a>
   <header class="masthead">
     <a class="brand" href="/" aria-label="IFF Witness 首頁"><span class="brand-mark" aria-hidden="true">⇔</span><span>IFF <strong>Witness</strong></span><span class="labs-label">LABS</span></a>
-    <nav aria-label="外部連結"><a href="https://ifandonlyif.io" target="_blank" rel="noopener noreferrer">IFF 主站 <span aria-hidden="true">↗</span></a><a href="https://docs.0g.ai/developer-hub/building-on-0g/compute-network/router/features/verifiable-execution" target="_blank" rel="noopener noreferrer">0G 驗證文件 <span aria-hidden="true">↗</span></a></nav>
+    <nav aria-label="主要導覽"><a href="/apostille.html">Apostille 範例</a><a href="https://ifandonlyif.io" target="_blank" rel="noopener noreferrer">IFF 主站 <span aria-hidden="true">↗</span></a><a href="https://docs.0g.ai/developer-hub/building-on-0g/compute-network/router/features/verifiable-execution" target="_blank" rel="noopener noreferrer">0G 驗證文件 <span aria-hidden="true">↗</span></a></nav>
   </header>
   <main id="workspace" class="workspace">
     <div class="intro">
@@ -23,6 +23,7 @@
       <div class="mode-control" id="live-password-row" hidden><label for="live-password">真實查核密碼</label><input id="live-password" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" maxlength="256" aria-describedby="live-password-help"><p id="live-password-help" class="fine-print">知道密碼才能執行真實 IFF + 0G 查核；密碼只留在這個分頁的記憶體裡，不會存起來。</p></div>
     </div>
     <div class="mode-notice" id="mode-notice" role="status"><span class="notice-dot" aria-hidden="true"></span><span id="mode-description">正在讀取應用設定…</span><span class="mode-tag" id="mode-tag">REHEARSAL</span></div>
+    <p class="mode-notice"><a href="/apostille.html">Apostille 互動練習：用 3 個步驟，看懂來源簽章與原件查驗 →</a></p>
     <div class="error-notice" id="error" role="alert" hidden></div>
     <div class="work-grid">
       <div class="work-main">

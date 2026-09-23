@@ -65,6 +65,12 @@ piece of that public JSON response, it defines its own minimal local type
 for exactly the fields it reads (see the `evidenceCard` type in
 `server.go`) rather than importing IFF's internal, much larger data model.
 
+## Apostille example addition (2026-09-23)
+
+The separate offline Apostille walkthrough was added after the original Witness extraction. It uses the public `iff-apostille` release `v0.1.0-alpha.1` (commit `d2c72c8b323a4bcd8f107c1b917209fecccbde0f`), not private hosted code. The unchanged Core and strict-JSON modules, source paths, SHA-256 pins and license are in `client/third-party/apostille/`. This protocol code predates the example and is not new Witness cryptography. `npm run build` verifies the pinned copies and includes their MIT notice in the separate browser bundle.
+
+The example signs the exact public rehearsal fixture or user-selected local bytes, keeps keys in memory, and never issues a hosted certificate or changes an inner proof. See [the walkthrough](examples/APOSTILLE.md).
+
 ## License
 
 MIT License, retained verbatim in [LICENSE](LICENSE). Preserve that notice

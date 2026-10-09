@@ -6,6 +6,7 @@ Noble cryptography libraries. Their MIT license notices are retained here:
 - [ethers](ethers-MIT.txt)
 - [@noble/curves](noble-curves-MIT.txt)
 - [@noble/hashes](noble-hashes-MIT.txt)
+- [@noble/post-quantum](noble-post-quantum-MIT.txt)
 
 Exact installed dependency versions are pinned in
 `../../package-lock.json`. Generated files also preserve legal
@@ -15,4 +16,4 @@ assets and update them if the bundled dependency set changes.
 Other Go and development-tool dependencies are resolved from the module and
 package lockfiles, not vendored into this source snapshot.
 
-The separate Apostille example includes the MIT-licensed Core 0.1 and strict-JSON modules from `iff-apostille v0.1.0-alpha.1`. See the [full license](../../client/third-party/apostille/LICENSE) and [pinned source manifest](../../client/third-party/apostille/SOURCE.json). The generated `web/apostille-demo.js` carries the full notice.
+The separate Apostille example includes the MIT-licensed Core modules (Core 0.3, which also verifies 0.1 and 0.2) and unmodified vendored Noble sources from `iff-apostille v0.4.0-alpha.1`. See the [full license](../../client/third-party/apostille/LICENSE) and [pinned source manifest](../../client/third-party/apostille/SOURCE.json). The generated `web/apostille-demo.js` carries the full notice.

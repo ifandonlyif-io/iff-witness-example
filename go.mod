@@ -1,8 +1,8 @@
 module github.com/ifandonlyif-io/iff-witness-example
 
-go 1.25.0
+go 1.27.0
 
-toolchain go1.26.6
+toolchain go1.27.2
 
 require (
 	github.com/ethereum/go-ethereum v1.17.2

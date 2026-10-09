@@ -2,26 +2,39 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync, createHash, sign } from "node:crypto";
 import { Wallet } from "ethers";
+import { ml_dsa65 } from "../web/vendor/noble/post-quantum/ml-dsa.js";
 import { requestProjection, sha256Text, tamperBundle, verifyBundle } from "./verify.mjs";
 
-const schema="https://ifandonlyif.io/schemas/service-receipt-v1.json";
+const schemaV1="https://ifandonlyif.io/schemas/service-receipt-v1.json";
+const schemaV2="https://ifandonlyif.io/schemas/service-receipt-v2.json";
 const now=new Date("2026-09-05T02:00:00.000Z");
 const digest=(value)=>createHash("sha256").update(value).digest("hex");
 const b64=(value)=>Buffer.from(value).toString("base64url");
 const check=(result,id)=>result.checks.find((item)=>item.id===id);
 
 // Test-only locally generated identity. It never represents production IFF.
-async function fixture() {
-    const {privateKey,publicKey}=generateKeyPairSync("ed25519");
-    const publicBytes=publicKey.export({type:"spki",format:"der"}).subarray(-32);
+// Version "2" (default) signs with ML-DSA-65; "1" keeps the historical Ed25519
+// envelope so old bundles stay verifiable.
+async function fixture(version="2") {
+    const schema=version==="2"?schemaV2:schemaV1;
+    let publicBytes,signEnvelope;
+    if (version==="2") {
+        const pair=ml_dsa65.keygen(Uint8Array.from({length:32},(_,i)=>i+1));
+        publicBytes=Buffer.from(pair.publicKey);
+        signEnvelope=(payloadJSON)=>Buffer.from(ml_dsa65.sign(Buffer.concat([Buffer.from("iff-service-receipt/v2\n"),Buffer.from(digest(payloadJSON),"hex")]),pair.secretKey));
+    } else {
+        const {privateKey,publicKey}=generateKeyPairSync("ed25519");
+        publicBytes=publicKey.export({type:"spki",format:"der"}).subarray(-32);
+        signEnvelope=(payloadJSON)=>sign(null,Buffer.from(digest("iff-service-receipt/v1\n"+payloadJSON),"hex"),privateKey);
+    }
     const keyID="sha256:"+digest(publicBytes);
-    const request={url:"https://weather.witness.example/forecast",payment_required:{x402Version:2,accepts:[{scheme:"exact",network:"eip155:8453",asset:"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",amount:"1000",payTo:"0x1111111111111111111111111111111111111111",maxTimeoutSeconds:60}]},receipt:{version:"1",nonce:"fixture-request-1"}};
+    const request={url:"https://weather.witness.example/forecast",payment_required:{x402Version:2,accepts:[{scheme:"exact",network:"eip155:8453",asset:"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",amount:"1000",payTo:"0x1111111111111111111111111111111111111111",maxTimeoutSeconds:60}]},receipt:{version,nonce:"fixture-request-1"}};
     const projection=await requestProjection(request);
     const subject={url:request.url,verdict:"consistent",received:JSON.parse(projection).received,disclaimer:"Test fixture; not payment safety."};
     const subjectText=JSON.stringify(subject);
     const payload={schema,receipt_id:"sr1_"+b64(Buffer.alloc(18,1)),issuer:"https://witness.example",service:"x402-requirement-verification",issued_at:"2026-09-05T02:00:00.000000Z",expires_at:"2026-09-05T02:05:00.000000Z",nonce:request.receipt.nonce,request_sha256:digest("iff-service-receipt/request/v1\n"+projection),subject_media_type:"application/json",subject_sha256:digest("iff-service-receipt/subject/v1\n"+subjectText),subject:b64(subjectText),evidence:null,compute_proof:null};
     const payloadJSON=JSON.stringify(payload);
-    const envelope={schema,payload:b64(payloadJSON),payload_sha256:digest(payloadJSON),signature:{algorithm:"Ed25519",key_id:keyID,public_key:b64(publicBytes),value:b64(sign(null,Buffer.from(digest("iff-service-receipt/v1\n"+payloadJSON),"hex"),privateKey))}};
+    const envelope={schema,payload:b64(payloadJSON),payload_sha256:digest(payloadJSON),signature:{algorithm:version==="2"?"ML-DSA-65":"Ed25519",key_id:keyID,public_key:b64(publicBytes),value:b64(signEnvelope(payloadJSON))}};
     const bundle={schema:"iff-witness/bundle/v1",id:"test",created_at:now.toISOString(),mode:"rehearsal",scenario:"consistent",request,iff:{response:JSON.stringify({...subject,service_receipt:envelope}),request_projection:projection,key_directory:{issuer:"https://witness.example",keys:[{key_id:keyID}]}},explanation:{source:"rehearsal",text:"Local rehearsal explanation."},compute:{status:"not_requested"},agent:null};
     return {bundle,options:{expectedIssuer:"https://witness.example",trustedKeyIDs:[keyID],expectedNonce:request.receipt.nonce,now}};
 }
@@ -33,6 +46,27 @@ test("rehearsal receipt checks cryptographic integrity but remains labelled loca
     for (const id of ["iff_signature","iff_outer","iff_nonce","iff_request"]) assert.equal(check(result,id).status,"pass",id);
     assert.equal(check(result,"iff_issuer").status,"warning");
     assert.equal(check(result,"compute_signature").status,"unverified");
+});
+
+test("historical v1 Ed25519 receipts still verify and are labelled by algorithm",async()=>{
+    const {bundle,options}=await fixture("1");
+    const result=await verifyBundle(bundle,options);
+    assert.equal(result.tampered,false,JSON.stringify(result.checks));
+    assert.equal(result.iffResult.algorithm,"Ed25519");
+    assert.match(check(result,"iff_signature").detail,/Ed25519/);
+});
+
+test("v2 receipts report ML-DSA-65 and a flipped signature byte is rejected",async()=>{
+    const {bundle,options}=await fixture();
+    const good=await verifyBundle(bundle,options);
+    assert.equal(good.iffResult.algorithm,"ML-DSA-65");
+    assert.match(check(good,"iff_signature").detail,/ML-DSA-65/);
+    const response=JSON.parse(bundle.iff.response);
+    const value=Buffer.from(response.service_receipt.signature.value,"base64url");
+    value[0]^=1;
+    response.service_receipt.signature.value=value.toString("base64url");
+    const bad=await verifyBundle({...bundle,iff:{...bundle.iff,response:JSON.stringify(response)}},options);
+    assert.equal(check(bad,"iff_signature").status,"fail");
 });
 
 test("outer verdict alteration is rejected while original signed subject remains authoritative",async()=>{

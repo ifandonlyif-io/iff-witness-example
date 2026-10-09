@@ -6,10 +6,11 @@ RUN npm ci --no-audit --no-fund
 COPY client ./client
 COPY scripts/build.mjs scripts/check-apostille-source.mjs ./scripts/
 COPY examples/agentic-demo-bundle.json ./examples/agentic-demo-bundle.json
-COPY web/service-receipt.mjs ./web/service-receipt.mjs
+COPY web/service-receipt.mjs web/ml-dsa-65.mjs ./web/
+COPY web/vendor ./web/vendor
 RUN npm run build
 
-FROM golang:1.26.6-alpine AS build
+FROM golang:1.27.2-alpine AS build
 RUN apk add --no-cache ca-certificates git
 WORKDIR /src
 COPY go.mod go.sum ./

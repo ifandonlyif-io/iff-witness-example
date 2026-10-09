@@ -288,12 +288,16 @@ func liveWitnessTransport(t *testing.T, s *Server, mode string, calls *int) witn
 		case "/api/v3/evidence/check":
 			return upstreamJSON(200, `{"success":true,"data":{"endpoint":{"url":"https://weather.witness.example/forecast"},"requirements":{"current":{"set_fingerprint":"exists"}},"freshness":{"status":"fresh","observed_at":"2026-09-05T00:00:00Z"}}}`), nil
 		case "/api/v3/receipts/keys":
-			keys, _ := json.Marshal(map[string]any{"issuer": s.config.IFFOrigin, "enabled": true, "keys": []any{map[string]string{"key_id": s.signer.KeyID(), "public_key": s.signer.PublicKeyBase64URL(), "algorithm": "Ed25519", "purpose": "service-receipt-signing", "status": "current"}}})
+			keys, _ := json.Marshal(map[string]any{"schema": receipt.KeyDirectorySchemaV2, "issuer": s.config.IFFOrigin, "enabled": true, "keys": []any{map[string]string{"key_id": s.signer.KeyID(), "public_key": s.signer.PublicKeyBase64URL(), "algorithm": receipt.AlgorithmMLDSA65, "purpose": "service-receipt-signing", "status": "current"}}})
 			return upstreamJSON(200, string(keys)), nil
 		case "/api/v3/verify":
 			var req serviceRequest
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				t.Fatal(err)
+			}
+			if req.Receipt.Version != "2" {
+				t.Errorf("live request asked for receipt version %q, want \"2\"", req.Receipt.Version)
+				return upstreamJSON(422, `{"error":"unsupported receipt version"}`), nil
 			}
 			projection, err := requestProjection(req.URL, req.PaymentRequired)
 			if err != nil {

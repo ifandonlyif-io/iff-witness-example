@@ -21,7 +21,7 @@ No account, API key, wallet, hosted issuance or 0G credits are needed. Results r
 | Tool | When you need it | Installation |
 |---|---|---|
 | Git | Download and update this repository | [Install Git for your OS](https://git-scm.com/install/) |
-| Go | Start the web app | [Install Go](https://go.dev/doc/install); use Go **1.26.6 or newer** to match or exceed the requested toolchain |
+| Go | Start the web app | [Install Go](https://go.dev/doc/install); use Go **1.27.2 or newer** (`crypto/mldsa` needs Go 1.27) |
 | Node.js + npm | Only for the optional CLI verifier, frontend development, or `npm start` | [Install a supported Node.js LTS](https://nodejs.org/en/download); these instructions require **22.9.0+** |
 
 Choose the installer for your operating system and processor. After installing, reopen Terminal on macOS/Linux or PowerShell on Windows, then check:
@@ -31,7 +31,7 @@ git --version
 go version
 ```
 
-Both commands should print a version. [go.mod](go.mod) declares a minimum Go version of 1.25.0 and requests toolchain 1.26.6. An older installation with automatic toolchain selection enabled may download the requested toolchain on first use; see [Go's toolchain documentation](https://go.dev/doc/toolchain). The first run needs internet access for Git, Go modules, and any toolchain download.
+Both commands should print a version. [go.mod](go.mod) declares a minimum Go version of 1.27.0 and requests toolchain 1.27.2. An older installation with automatic toolchain selection enabled may download the requested toolchain on first use; see [Go's toolchain documentation](https://go.dev/doc/toolchain). The first run needs internet access for Git, Go modules, and any toolchain download.
 
 ## 2. Download and start
 
@@ -66,7 +66,7 @@ Keep **演練資料** (rehearsal) selected:
 3. Select **修改判定並驗證**. The signature can remain valid, but the outer result should fail the signed-content comparison.
 4. Select **還原原始證據**, then **下載證據包**. Use **匯入證據包重新驗證** to check the saved file locally.
 
-Rehearsal uses simulated observations, a real process-local Ed25519 demo signature, and fixed explanation text. It makes **no external service requests** and spends no 0G credits. Missing 0G/AgenticID proofs stay `unverified`; that is expected, not an installation failure.
+Rehearsal uses simulated observations, a real process-local ML-DSA-65 demo signature (Service Receipt v2), and fixed explanation text. It makes **no external service requests** and spends no 0G credits. Missing 0G/AgenticID proofs stay `unverified`; that is expected, not an installation failure.
 
 ## 4. Optional: enable real IFF + 0G
 

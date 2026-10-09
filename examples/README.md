@@ -64,4 +64,4 @@ controlled `payTo` mutation remain visibly distinct from an actual attack.
 
 ## Apostille source-signature example
 
-[APOSTILLE.md](APOSTILLE.md) shows how to sign the exact Witness rehearsal file with Core 0.1, detect changed original bytes, and re-verify with Node or the released Go CLI. The original test fixture stays unchanged; the new signatures are local producer-only examples.
+[APOSTILLE.md](APOSTILLE.md) shows how to sign the exact Witness rehearsal file with Core 0.3 (ML-DSA-65), detect changed original bytes, and re-verify with Node or the released Go CLI. The original test fixture stays unchanged; the new signatures are local producer-only examples.

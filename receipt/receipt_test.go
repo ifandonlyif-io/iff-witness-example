@@ -1,7 +1,8 @@
 package receipt
 
 import (
-	"crypto/ed25519"
+	"crypto/mldsa"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -12,7 +13,8 @@ import (
 	"time"
 )
 
-const testSeedBase64 = "sK7iZeerLXZ6bgq6EKUTss541HL4SyUu7UxmVj9fClM="
+// testSeedBase64URL is the public v2 vector seed: bytes 0x40..0x5f.
+const testSeedBase64URL = "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8"
 
 func testPayload(t testing.TB) Payload {
 	t.Helper()
@@ -40,7 +42,7 @@ func testPayload(t testing.TB) Payload {
 
 func testSigner(t testing.TB) *Signer {
 	t.Helper()
-	signer, err := NewSigner(testSeedBase64)
+	signer, err := NewSigner(testSeedBase64URL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,8 +52,11 @@ func testSigner(t testing.TB) *Signer {
 func signRawPayload(t *testing.T, signer *Signer, payloadBytes []byte, domain string) Envelope {
 	t.Helper()
 	payloadHash := sha256.Sum256(payloadBytes)
-	input := append([]byte(domain), payloadBytes...)
-	digest := sha256.Sum256(input)
+	message := append([]byte(domain), payloadHash[:]...)
+	signature, err := signer.privateKey.Sign(rand.Reader, message, &mldsa.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
 	return Envelope{
 		Schema:        Schema,
 		Payload:       base64.RawURLEncoding.EncodeToString(payloadBytes),
@@ -60,7 +65,7 @@ func signRawPayload(t *testing.T, signer *Signer, payloadBytes []byte, domain st
 			Algorithm: Algorithm,
 			KeyID:     signer.KeyID(),
 			PublicKey: signer.PublicKeyBase64URL(),
-			Value:     base64.RawURLEncoding.EncodeToString(ed25519.Sign(signer.privateKey, digest[:])),
+			Value:     base64.RawURLEncoding.EncodeToString(signature),
 		},
 	}
 }
@@ -179,20 +184,7 @@ func TestVerifyRejectsTamperingAndNonCanonicalPayload(t *testing.T) {
 	// A differently formatted payload can be signed correctly, but v1 still
 	// rejects it because canonical fixed-order JSON is part of the contract.
 	payloadBytes, _ := json.MarshalIndent(testPayload(t), "", "  ")
-	payloadHash := sha256.Sum256(payloadBytes)
-	digest := signingDigest(payloadBytes)
-	privateKey := signer.privateKey
-	nonCanonical := Envelope{
-		Schema:        Schema,
-		Payload:       base64.RawURLEncoding.EncodeToString(payloadBytes),
-		PayloadSHA256: hex.EncodeToString(payloadHash[:]),
-		Signature: Signature{
-			Algorithm: Algorithm,
-			KeyID:     signer.KeyID(),
-			PublicKey: signer.PublicKeyBase64URL(),
-			Value:     base64.RawURLEncoding.EncodeToString(ed25519.Sign(privateKey, digest[:])),
-		},
-	}
+	nonCanonical := signRawPayload(t, signer, payloadBytes, DomainV2)
 	if _, err := Verify(nonCanonical, VerifyOptions{}); err == nil {
 		t.Fatal("non-canonical signed payload must fail")
 	}
@@ -235,8 +227,8 @@ func TestVerifyJSONRejectsSignedDuplicateKeysAtEverySignedLayer(t *testing.T) {
 	}
 	duplicateSignature := strings.Replace(
 		string(envelopeRaw),
-		`"algorithm":"Ed25519"`,
-		`"algorithm":"Ed25519","algorithm":"Ed25519"`,
+		`"algorithm":"ML-DSA-65"`,
+		`"algorithm":"ML-DSA-65","algorithm":"ML-DSA-65"`,
 		1,
 	)
 	if _, err := VerifyJSON([]byte(duplicateSignature), VerifyOptions{}); !errors.Is(err, ErrInvalidEnvelope) {
@@ -387,15 +379,28 @@ func TestNewSignerEmptyIsDisabled(t *testing.T) {
 	}
 }
 
-func TestNewSignerRejectsInconsistentExpandedPrivateKey(t *testing.T) {
-	seed, err := base64.StdEncoding.DecodeString(testSeedBase64)
-	if err != nil {
-		t.Fatal(err)
+func TestNewSignerRequiresCanonicalSeedAndNeverEchoesIt(t *testing.T) {
+	good := testSeedBase64URL
+	cases := map[string]string{
+		"padded":          good + "=",
+		"std alphabet":    good[:10] + "+" + good[11:],
+		"short":           good[:42],
+		"long":            good + "A",
+		"noncanonical":    good[:42] + "F", // final sextet carries non-zero unused bits
+		"ed25519 private": base64.RawURLEncoding.EncodeToString(make([]byte, 64)),
+		"whitespace":      " " + good,
+		"not base64":      strings.Repeat("!", 43),
 	}
-	expanded := ed25519.NewKeyFromSeed(seed)
-	expanded[len(expanded)-1] ^= 0xff
-	if _, err := NewSigner(base64.RawURLEncoding.EncodeToString(expanded)); err == nil {
-		t.Fatal("expanded private key with an inconsistent public half must fail")
+	for name, value := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, err := NewSigner(value)
+			if err == nil {
+				t.Fatal("seed must be rejected")
+			}
+			if strings.Contains(err.Error(), value) || strings.Contains(err.Error(), good) {
+				t.Fatal("error must never contain the seed value")
+			}
+		})
 	}
 }
 
@@ -674,7 +679,7 @@ func TestEvidenceAndComputeValidationBoundaries(t *testing.T) {
 }
 
 func FuzzVerifyJSONNeverPanics(f *testing.F) {
-	signer, err := NewSigner(testSeedBase64)
+	signer, err := NewSigner(testSeedBase64URL)
 	if err != nil {
 		f.Fatal(err)
 	}

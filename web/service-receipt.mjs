@@ -1,6 +1,22 @@
-export const RECEIPT_SCHEMA = "https://ifandonlyif.io/schemas/service-receipt-v1.json";
-export const RECEIPT_ALGORITHM = "Ed25519";
-export const RECEIPT_DOMAIN = "iff-service-receipt/v1\n";
+// Service Receipt v1 (Ed25519, historical) and v2 (ML-DSA-65, issued). The
+// envelope schema decides the version; the algorithm, key size and signature
+// size must match it, and the signed payload schema must equal the envelope's.
+export const RECEIPT_SCHEMA_V1 = "https://ifandonlyif.io/schemas/service-receipt-v1.json";
+export const RECEIPT_SCHEMA_V2 = "https://ifandonlyif.io/schemas/service-receipt-v2.json";
+export const RECEIPT_ALGORITHM_ED25519 = "Ed25519";
+export const RECEIPT_ALGORITHM_MLDSA65 = "ML-DSA-65";
+export const RECEIPT_DOMAIN_V1 = "iff-service-receipt/v1\n";
+export const RECEIPT_DOMAIN_V2 = "iff-service-receipt/v2\n";
+export const KEY_DIRECTORY_SCHEMA_V1 = "https://ifandonlyif.io/schemas/service-receipt-key-directory-v1.json";
+export const KEY_DIRECTORY_SCHEMA_V2 = "https://ifandonlyif.io/schemas/service-receipt-key-directory-v2.json";
+// The v1 names stay as aliases of the historical profile.
+export const RECEIPT_SCHEMA = RECEIPT_SCHEMA_V1;
+export const RECEIPT_ALGORITHM = RECEIPT_ALGORITHM_ED25519;
+export const RECEIPT_DOMAIN = RECEIPT_DOMAIN_V1;
+const RECEIPT_PROFILES = Object.freeze({
+    [RECEIPT_SCHEMA_V1]: Object.freeze({ version: "1", algorithm: RECEIPT_ALGORITHM_ED25519, publicKeySize: 32, signatureSize: 64 }),
+    [RECEIPT_SCHEMA_V2]: Object.freeze({ version: "2", algorithm: RECEIPT_ALGORITHM_MLDSA65, publicKeySize: 1952, signatureSize: 3309 }),
+});
 export const REQUEST_HASH_DOMAIN = "iff-service-receipt/request/v1\n";
 export const SUBJECT_HASH_DOMAIN = "iff-service-receipt/subject/v1\n";
 export const MAX_RECEIPT_INPUT_BYTES = 256 * 1024;
@@ -308,10 +324,10 @@ function parseCanonicalUint64(value, label) {
     return parsed;
 }
 
-function validatePayloadShape(payload, subjectBytes) {
+function validatePayloadShape(payload, subjectBytes, schema) {
     const fields = ["schema", "receipt_id", "issuer", "service", "issued_at", "expires_at", "nonce", "request_sha256", "subject_media_type", "subject_sha256", "subject", "evidence", "compute_proof"];
     requireExactKeys(payload, fields, "payload");
-    if (payload.schema !== RECEIPT_SCHEMA) fail("unsupported_schema", "The signed payload schema is not supported.");
+    if (payload.schema !== schema) fail("unsupported_schema", "The signed payload schema is not supported or differs from the envelope schema.");
     if (!/^sr1_[A-Za-z0-9_-]{24}$/.test(payload.receipt_id)) fail("invalid_payload", "receipt_id is invalid.");
     if (!validateIssuer(payload.issuer)) fail("invalid_payload", "issuer must be an HTTPS origin.");
     if (!SERVICE_PATTERN.test(payload.service)) fail("invalid_payload", "service is invalid.");
@@ -368,20 +384,48 @@ function normalizeNow(value) {
     return millisecondsToMicros(milliseconds);
 }
 
-function directoryRecognizes(directory, issuer, keyID, publicKey) {
+// A directory entry recognizes a receipt only when key_id, algorithm and
+// public_key all equal the receipt's and the status is current, previous or
+// inactive. A v1 directory can only list Ed25519 keys.
+function directoryRecognizes(directory, issuer, keyID, publicKey, algorithm) {
     if (!directory || typeof directory !== "object" || Array.isArray(directory)) return false;
     try {
         requireExactKeys(directory, ["schema", "issuer", "enabled", "keys"], "key directory");
-        if (directory.schema !== "https://ifandonlyif.io/schemas/service-receipt-key-directory-v1.json" ||
+        const v1Directory = directory.schema === KEY_DIRECTORY_SCHEMA_V1;
+        if ((!v1Directory && directory.schema !== KEY_DIRECTORY_SCHEMA_V2) ||
             directory.issuer !== issuer || typeof directory.enabled !== "boolean" || !Array.isArray(directory.keys)) return false;
+        if (v1Directory && algorithm !== RECEIPT_ALGORITHM_ED25519) return false;
         return directory.keys.some((key) => {
             requireExactKeys(key, ["key_id", "algorithm", "public_key", "purpose", "status"], "directory key");
-            return key.key_id === keyID && key.public_key === publicKey && key.algorithm === RECEIPT_ALGORITHM &&
+            return key.key_id === keyID && key.public_key === publicKey && key.algorithm === algorithm &&
                 key.purpose === "service-receipt-signing" && ["current", "previous", "inactive"].includes(key.status);
         });
     } catch {
         return false;
     }
+}
+
+async function verifyReceiptSignature(profile, publicKey, signature, payloadBytes) {
+    if (profile.algorithm === RECEIPT_ALGORITHM_ED25519) {
+        const signingDigest = await sha256(concatBytes(textEncoder.encode(RECEIPT_DOMAIN_V1), payloadBytes));
+        let signingKey;
+        try {
+            signingKey = await globalThis.crypto.subtle.importKey("raw", publicKey, { name: "Ed25519" }, false, ["verify"]);
+        } catch {
+            fail("ed25519_unavailable", "This browser cannot import Ed25519 verification keys.");
+        }
+        return globalThis.crypto.subtle.verify({ name: "Ed25519" }, signingKey, signature, signingDigest);
+    }
+    // v2 signs the domain line followed by the payload digest with ML-DSA-65
+    // (empty context), through the vendored @noble/post-quantum 0.7.1.
+    let verifyMLDSA;
+    try {
+        ({ verifyMLDSA } = await import("./ml-dsa-65.mjs"));
+    } catch {
+        fail("mldsa_unavailable", "The ML-DSA-65 verifier could not be loaded.");
+    }
+    const message = concatBytes(textEncoder.encode(RECEIPT_DOMAIN_V2), await sha256(payloadBytes));
+    return verifyMLDSA(publicKey, message, signature);
 }
 
 export async function verifyServiceReceipt(inputText, options = {}) {
@@ -394,26 +438,22 @@ export async function verifyServiceReceipt(inputText, options = {}) {
     const envelope = embedded ? document.value.service_receipt : document.value;
     requireExactKeys(envelope, ["schema", "payload", "payload_sha256", "signature"], "envelope");
     requireExactKeys(envelope.signature, ["algorithm", "key_id", "public_key", "value"], "signature");
-    if (envelope.schema !== RECEIPT_SCHEMA) fail("unsupported_schema", "The receipt envelope schema is not supported.");
-    if (envelope.signature.algorithm !== RECEIPT_ALGORITHM) fail("unsupported_algorithm", "Only Ed25519 Service Receipt v1 signatures are supported.");
+    const profile = Object.hasOwn(RECEIPT_PROFILES, envelope.schema) ? RECEIPT_PROFILES[envelope.schema] : null;
+    if (profile === null) fail("unsupported_schema", "The receipt envelope schema is not supported.");
+    if (envelope.signature.algorithm !== profile.algorithm) {
+        fail("unsupported_algorithm", `Service Receipt v${profile.version} signatures must use ${profile.algorithm}.`);
+    }
     if (!DIGEST_PATTERN.test(envelope.payload_sha256) || !KEY_ID_PATTERN.test(envelope.signature.key_id)) fail("invalid_envelope", "Envelope hashes are malformed.");
 
     const payloadBytes = decodeBase64URL(envelope.payload, "payload");
     if (payloadBytes.length === 0 || payloadBytes.length > MAX_PAYLOAD_BYTES) fail("payload_size", "Decoded receipt payload size is invalid.");
     const payloadHash = await sha256(payloadBytes);
     if (hex(payloadHash) !== envelope.payload_sha256) fail("payload_hash_mismatch", "payload_sha256 does not match the signed payload bytes.");
-    const publicKey = decodeBase64URL(envelope.signature.public_key, "public_key", 32);
-    const signature = decodeBase64URL(envelope.signature.value, "signature", 64);
+    const publicKey = decodeBase64URL(envelope.signature.public_key, "public_key", profile.publicKeySize);
+    const signature = decodeBase64URL(envelope.signature.value, "signature", profile.signatureSize);
     const keyID = `sha256:${hex(await sha256(publicKey))}`;
     if (keyID !== envelope.signature.key_id) fail("key_id_mismatch", "key_id does not match the embedded public key.");
-    const signingDigest = await sha256(concatBytes(textEncoder.encode(RECEIPT_DOMAIN), payloadBytes));
-    let signingKey;
-    try {
-        signingKey = await globalThis.crypto.subtle.importKey("raw", publicKey, { name: "Ed25519" }, false, ["verify"]);
-    } catch {
-        fail("ed25519_unavailable", "This browser cannot import Ed25519 verification keys.");
-    }
-    if (!await globalThis.crypto.subtle.verify({ name: "Ed25519" }, signingKey, signature, signingDigest)) {
+    if (!await verifyReceiptSignature(profile, publicKey, signature, payloadBytes)) {
         fail("signature_mismatch", "Receipt contents and signature do not match.");
     }
 
@@ -424,7 +464,7 @@ export async function verifyServiceReceipt(inputText, options = {}) {
     const payload = payloadDocument.value;
     if (JSON.stringify(payload) !== payloadText) fail("noncanonical_payload", "Signed payload is not canonical fixed-order JSON.");
     const subjectBytes = decodeBase64URL(payload.subject, "subject");
-    const time = validatePayloadShape(payload, subjectBytes);
+    const time = validatePayloadShape(payload, subjectBytes, envelope.schema);
     if (hex(await sha256(concatBytes(textEncoder.encode(SUBJECT_HASH_DOMAIN), subjectBytes))) !== payload.subject_sha256) {
         fail("subject_hash_mismatch", "subject_sha256 does not match the signed result bytes.");
     }
@@ -441,7 +481,7 @@ export async function verifyServiceReceipt(inputText, options = {}) {
     const expectedIssuer = typeof options.expectedIssuer === "string" ? options.expectedIssuer : "";
     const trustedKeyIDs = new Set(Array.isArray(options.trustedKeyIDs) ? options.trustedKeyIDs : []);
     const issuerTrusted = expectedIssuer !== "" && payload.issuer === expectedIssuer && trustedKeyIDs.has(keyID);
-    const issuerKnown = directoryRecognizes(options.knownDirectory, payload.issuer, keyID, envelope.signature.public_key);
+    const issuerKnown = directoryRecognizes(options.knownDirectory, payload.issuer, keyID, envelope.signature.public_key, profile.algorithm);
     const now = normalizeNow(options.now);
     const skewMilliseconds = Number.isFinite(options.clockSkewMs) && options.clockSkewMs >= 0 ? options.clockSkewMs : 0;
     const skew = millisecondsToMicros(skewMilliseconds);
@@ -453,6 +493,8 @@ export async function verifyServiceReceipt(inputText, options = {}) {
 
     return {
         signatureValid: true,
+        version: profile.version,
+        algorithm: profile.algorithm,
         issuerTrusted,
         issuerKnown,
         issuerTrust: issuerTrusted ? "trusted" : issuerKnown ? "known" : "untrusted",

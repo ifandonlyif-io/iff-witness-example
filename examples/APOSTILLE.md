@@ -1,6 +1,6 @@
 # Apostille example: sign a Witness artifact, verify the original
 
-這個範例替 Witness 證據包加上 Apostille Core 0.1 來源簽章，再修改原件的一個位元組，展示「簽章有效」與「原件相符」是不同檢查。使用本機臨時金鑰，不需帳號、錢包、API key 或 0G 額度。
+這個範例替 Witness 證據包加上 Apostille Core 0.3（ML-DSA-65）來源簽章，再修改原件的一個位元組，展示「簽章有效」與「原件相符」是不同檢查。使用本機臨時金鑰，不需帳號、錢包、API key 或 0G 額度。
 
 ## Browser walkthrough
 
@@ -26,7 +26,7 @@ Open **查驗收到的檔案** and choose **產生一組測試檔案**. No previ
 
 Download feedback reports which required file remains. Confirm your browser saved both files. **重新產生一組** makes a new group and clears the recipient's selected files and previous verification result, so the new group is never shown with a stale pass. Existing guide progress is retained. Generated files contain public sample data and public signature material, not private keys or a hosted issuer certificate.
 
-The page uses the existing Witness visual style, local assets and `connect-src 'none'`. Selected files are never uploaded. Browser WebCrypto Ed25519 support and a secure context (HTTPS or loopback HTTP) are required. New administrator/agent keys are non-exportable and short-lived in memory; they are not registered with IFF or saved for future signing. This is an integration example, not a production key-management system.
+The page uses the existing Witness visual style, local assets and `connect-src 'none'`. Selected files are never uploaded. New administrator/agent ML-DSA-65 keys are generated in the page, short-lived in memory and never written out; they are not registered with IFF or saved for future signing. This is an integration example, not a production key-management system.
 
 ## Terminal walkthrough
 
@@ -41,7 +41,7 @@ npm run apostille -- demo my-apostille-demo
 It writes only:
 
 - `witness-original.json`: the exact public Witness rehearsal fixture.
-- `apostille-bundle.json`: real Core 0.1 delegation, acceptance and origin statement, with `certificate: null`.
+- `apostille-bundle.json`: real Core 0.3 (ML-DSA-65) delegation, acceptance and origin statement, with `certificate: null`.
 - `witness-with-space.json`: original bytes plus one ASCII space, for the negative check.
 
 The printed results must show `original.original_matches: true` and `changed.original_matches: false`, while both retain `signature_check: valid`. All signing keys are discarded; no seed or key file is exported.
@@ -67,7 +67,7 @@ Output files/directories must be new; existing files are never overwritten. Regu
 With a Go toolchain, install the released CLI and add `GOBIN` (or `GOPATH/bin`) to `PATH`:
 
 ```sh
-go install github.com/ifandonlyif-io/iff-apostille/cmd/apostille@v0.1.0-alpha.1
+go install github.com/ifandonlyif-io/iff-apostille/cmd/apostille@v0.4.0-alpha.1
 apostille verify --offline --bundle my-apostille-demo/apostille-bundle.json --artifact my-apostille-demo/witness-original.json
 apostille verify --offline --bundle my-apostille-demo/apostille-bundle.json --artifact my-apostille-demo/witness-with-space.json
 ```
@@ -82,7 +82,7 @@ Verify IFF/0G/AgenticID evidence separately in Witness or with `npm run verify`.
 
 ## Source and checks
 
-The browser/CLI helper uses byte-for-byte copies of `web/apostille-core.mjs` and `web/apostille-json.mjs` from the public [Apostille v0.1.0-alpha.1 release](https://github.com/ifandonlyif-io/iff-apostille/releases/tag/v0.1.0-alpha.1), commit `d2c72c8b323a4bcd8f107c1b917209fecccbde0f`. This avoids depending on an unpublished npm package or importing private IFF code.
+The browser/CLI helper uses byte-for-byte copies of the Core modules and vendored Noble sources under `web/` from the public [Apostille v0.4.0-alpha.1 release](https://github.com/ifandonlyif-io/iff-apostille/releases/tag/v0.4.0-alpha.1), commit `a33ea7049791cad731ddc9519e76fa22f6893879` (pinned in `SOURCE.json`). They still verify Core 0.1 bundles. This avoids depending on an unpublished npm package or importing private IFF code.
 
 [`SOURCE.json`](../client/third-party/apostille/SOURCE.json) records exact source paths and SHA-256 hashes. `npm run build` checks these copies before bundling. Update them only from a reviewed public release; preserve the [MIT License](../client/third-party/apostille/LICENSE), which is also included in the generated browser script.
 

@@ -1,19 +1,111 @@
 {
   "repository": "https://github.com/ifandonlyif-io/iff-apostille",
-  "tag": "v0.1.0-alpha.1",
-  "commit": "d2c72c8b323a4bcd8f107c1b917209fecccbde0f",
+  "tag": "v0.4.0-alpha.1",
+  "commit": "a33ea7049791cad731ddc9519e76fa22f6893879",
   "files": {
+    "LICENSE": {
+      "source": "LICENSE",
+      "sha256": "8af338d6c97d430b5285a9e6a3ff041fd745dc01c3bb1e2896bf20fbbec65ff7"
+    },
     "apostille-core.mjs": {
       "source": "web/apostille-core.mjs",
-      "sha256": "2b6adc95c2f49eebd9ec4bbba8791245b86c3f51878eb85805c5f19135e3208a"
+      "sha256": "583791dc8e5b2f7ded8b7db4e7b4aeb6e9aebdb72b46538650fb2e9b53bd32d3"
+    },
+    "apostille-ed25519.mjs": {
+      "source": "web/apostille-ed25519.mjs",
+      "sha256": "a6ec798bb6f527fdaea2d64313549b040a7410ed28c0c407960e624619ad1735"
+    },
+    "apostille-identifier.mjs": {
+      "source": "web/apostille-identifier.mjs",
+      "sha256": "7d3b7f5479e66890a805259808a854ce89807f26ad118a2bf0ffab18f968b36a"
     },
     "apostille-json.mjs": {
       "source": "web/apostille-json.mjs",
       "sha256": "e2808409e4d61b01f5dc0d146c6e7ebf0379ac564365d97fac20c1b7447e924b"
     },
-    "LICENSE": {
-      "source": "LICENSE",
-      "sha256": "8af338d6c97d430b5285a9e6a3ff041fd745dc01c3bb1e2896bf20fbbec65ff7"
+    "apostille-mldsa.mjs": {
+      "source": "web/apostille-mldsa.mjs",
+      "sha256": "7d6262098b83ea5c6bae86c7f7cc9904cf1b6fb8e4134d837ef46f3c45fc646d"
+    },
+    "apostille-profile.mjs": {
+      "source": "web/apostille-profile.mjs",
+      "sha256": "70c9fa478f68dc9de1c1f41847104f5c6165b37cddf280f8d359721e6070e729"
+    },
+    "vendor/noble/curves/abstract/curve.js": {
+      "source": "web/vendor/noble/curves/abstract/curve.js",
+      "sha256": "dbaeee3b41ff47efb76b78e14170fe4dda7c7ecdc387c402f16c5118e0bac356"
+    },
+    "vendor/noble/curves/abstract/edwards.js": {
+      "source": "web/vendor/noble/curves/abstract/edwards.js",
+      "sha256": "f24a9c221a549a8fff259eb8f245ab0dc17679b13c532c3970d91acc4df9fffd"
+    },
+    "vendor/noble/curves/abstract/fft.js": {
+      "source": "web/vendor/noble/curves/abstract/fft.js",
+      "sha256": "a4b2ff7ca33f4acc85d61f0e83ec3303c3f6b38ecc19b20d0f6462d820e518cf"
+    },
+    "vendor/noble/curves/abstract/frost.js": {
+      "source": "web/vendor/noble/curves/abstract/frost.js",
+      "sha256": "b13be328575b5e751ad803753c13bda47fef3991368105ebc8abf7fa27187179"
+    },
+    "vendor/noble/curves/abstract/hash-to-curve.js": {
+      "source": "web/vendor/noble/curves/abstract/hash-to-curve.js",
+      "sha256": "e3c97e7d0827b728b14e3311ed11d8e386d8a70d8fc77e0b9fd2a3090f19d955"
+    },
+    "vendor/noble/curves/abstract/modular.js": {
+      "source": "web/vendor/noble/curves/abstract/modular.js",
+      "sha256": "9ced3aa10598277a735e54f7b61d88e929d565da884ba5385f9006ebb3b6aab2"
+    },
+    "vendor/noble/curves/abstract/montgomery.js": {
+      "source": "web/vendor/noble/curves/abstract/montgomery.js",
+      "sha256": "cdafa8816dad5a24475ec51952c5f71fdd5d1b46880ab982694c4f8ff605fc46"
+    },
+    "vendor/noble/curves/abstract/oprf.js": {
+      "source": "web/vendor/noble/curves/abstract/oprf.js",
+      "sha256": "2ca36b3e4930092db1f91559410e86975816c036e248067bc65a8055aa1c504c"
+    },
+    "vendor/noble/curves/ed25519.js": {
+      "source": "web/vendor/noble/curves/ed25519.js",
+      "sha256": "c2da2a55504457ae152e2e3167131919230c0e705f33f1762e3d11cfa7295bbf"
+    },
+    "vendor/noble/curves/utils.js": {
+      "source": "web/vendor/noble/curves/utils.js",
+      "sha256": "721216668546d48385b5bca2f28b235ac21186cf12084f63e62e8411aa13ab7e"
+    },
+    "vendor/noble/hashes/_md.js": {
+      "source": "web/vendor/noble/hashes/_md.js",
+      "sha256": "60cf3010fda89e3e4d3f0e7ff1ce249e9c467f34b4fd41b6fd6101d9f69be763"
+    },
+    "vendor/noble/hashes/_u64.js": {
+      "source": "web/vendor/noble/hashes/_u64.js",
+      "sha256": "b09da8c07fe8187c07649494cdb7cd0bcf13df90b506a9473d19e4d5f8c2e102"
+    },
+    "vendor/noble/hashes/sha2.js": {
+      "source": "web/vendor/noble/hashes/sha2.js",
+      "sha256": "471746bba6ec4c6238ca41358d1d3b40b6ff31cf3363f0b4d550c649c1a8e83b"
+    },
+    "vendor/noble/hashes/sha3.js": {
+      "source": "web/vendor/noble/hashes/sha3.js",
+      "sha256": "9a81e1edb24eae27b335533220167609cfb58008c5690e140ce478acdc669f32"
+    },
+    "vendor/noble/hashes/utils.js": {
+      "source": "web/vendor/noble/hashes/utils.js",
+      "sha256": "037ad49adb78168b6b699598fd33f85f7877456b1d28b4d032e2a1a16807947c"
+    },
+    "vendor/noble/package.json": {
+      "source": "web/vendor/noble/package.json",
+      "sha256": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a"
+    },
+    "vendor/noble/post-quantum/_crystals.js": {
+      "source": "web/vendor/noble/post-quantum/_crystals.js",
+      "sha256": "0ebd9e698272ad6ff2f05479570f3440c36d96e6ac633c107627fa2ee71ec86a"
+    },
+    "vendor/noble/post-quantum/ml-dsa.js": {
+      "source": "web/vendor/noble/post-quantum/ml-dsa.js",
+      "sha256": "2765f2c3a29739883dcf1f010d95d3da58cc5ecab659866f7fb91ee48444fc0b"
+    },
+    "vendor/noble/post-quantum/utils.js": {
+      "source": "web/vendor/noble/post-quantum/utils.js",
+      "sha256": "081d259b2f9d77537d098e11d13ccad035723f0129651b130e8ecc3031ad9caf"
     }
   }
 }

@@ -40,6 +40,7 @@ type IFFVerification struct {
 	RequestBound   bool   `json:"request_bound"`
 	OuterBound     bool   `json:"outer_bound"`
 	KeyID          string `json:"key_id,omitempty"`
+	Algorithm      string `json:"algorithm,omitempty"`
 	Subject        []byte `json:"-"`
 }
 
@@ -62,9 +63,15 @@ func verifyIFFResponse(raw, projection []byte, nonce, expectedIssuer string, tru
 	if err != nil {
 		return result, fmt.Errorf("IFF receipt: %w", err)
 	}
+	// Witness only accepts new Service Receipt v2 (ML-DSA-65). Historical v1
+	// Ed25519 receipts remain verifiable by the receipt package, not here.
+	if verified.Algorithm != receipt.AlgorithmMLDSA65 {
+		return result, errors.New("IFF receipt is not an ML-DSA-65 Service Receipt v2")
+	}
 	result.SignatureValid, result.IssuerTrusted = verified.SignatureValid, verified.IssuerTrusted
 	result.Fresh = !verified.Expired && !verified.NotYetValid
 	result.KeyID = verified.KeyID
+	result.Algorithm = verified.Algorithm
 	result.Subject = verified.Subject
 	result.NonceBound = nonce != "" && verified.Payload.Nonce != nil && *verified.Payload.Nonce == nonce
 	hash := receipt.RequestHash(projection)

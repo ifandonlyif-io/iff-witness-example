@@ -208,7 +208,7 @@ byID('ap-kit-generate').addEventListener('click', async () => {
     byID('ap-bundle-file').value = ''; byID('ap-original-file').value = '';
     sessions.import = fresh();
   } catch (error) {
-    kitError = '未能產生測試檔案。請使用支援 Ed25519 的新版瀏覽器，或依頁面下方的命令列指引產生。';
+    kitError = '未能產生測試檔案。請使用新版瀏覽器，或依頁面下方的命令列指引產生。';
   } finally {
     kitBusy = false; render(); byID('ap-kit-generate').focus({ preventScroll: true });
   }

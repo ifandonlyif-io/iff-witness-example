@@ -36,3 +36,9 @@
 **/*~
 
 /witness
+
+# Vendored, unmodified @noble/* ML-DSA-65 verifier sources (see web/vendor/noble/NOTICE.md).
+!web/vendor/
+!web/vendor/**
+!client/third-party/apostille/vendor/
+!client/third-party/apostille/vendor/**

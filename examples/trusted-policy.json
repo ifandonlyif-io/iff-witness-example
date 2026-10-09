@@ -1,6 +1,6 @@
 {
   "expectedIssuer": "https://ifandonlyif.io",
-  "trustedKeyIDs": ["sha256:0f872f79cd935ac2d764589c8283d35ae0ca02780faebee8862db85348fc5ceb"],
+  "trustedKeyIDs": ["sha256:70be5c7a580fd0d89b34c4be79ed73fb7036ed3fb696223a1e271f61b9dcc217"],
   "agentic": {
     "expectedSigner": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A",
     "chainId": 16602,

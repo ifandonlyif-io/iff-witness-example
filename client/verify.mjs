@@ -63,7 +63,7 @@ export async function verifyBundle(input, options={}) {
     try {
         if (typeof bundle.iff.response!=="string") throw new Error("IFF response must retain its raw JSON text.");
         iffResult=await verifyServiceReceipt(bundle.iff.response,{expectedIssuer:options.expectedIssuer,trustedKeyIDs:options.trustedKeyIDs,now:options.now});
-        check("iff_signature","pass","IFF 收據簽章","Ed25519 簽章與已簽署的內容／主體雜湊相符。這是來源證明，不是安全認證。");
+        check("iff_signature","pass","IFF 收據簽章",`${iffResult.algorithm} 簽章（Service Receipt v${iffResult.version}）與已簽署的內容／主體雜湊相符。這是來源證明，不是安全認證。`);
         const localIssuer=/^http:\/\/(localhost|127\.|\[::1\])/.test(iffResult.payload.issuer) || new URL(iffResult.payload.issuer).hostname.endsWith(".example");
         check("iff_issuer",iffResult.issuerTrusted ? (localIssuer?"warning":"pass") : "unverified",localIssuer?"本機演練金鑰":"IFF 發行者",iffResult.issuerTrusted ? `已比對呼叫端提供的發行者／金鑰政策：${iffResult.payload.issuer}${localIssuer?"。本機演練簽章，非正式 IFF 正式收據。":"。"}` : "沒有比對到任何獨立信任的發行者／金鑰政策。內嵌金鑰與證據包內附的目錄都不能作為信任錨點。");
         check("iff_time",!iffResult.expired && !iffResult.notYetValid?"pass":"warning","收據有效時間",iffResult.expired?"簽章仍屬歷史有效，但收據已過期；不足以支持新的動作。":iffResult.notYetValid?"收據的簽發時間在未來；不足以支持這次動作。":"收據仍在簽署的有效時間窗內。");

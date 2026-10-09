@@ -4,6 +4,7 @@ import { readFile, mkdtemp, writeFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { generateKeyFile, importKeyFile, createRegistration, createStatement, canonical, PROTOCOL } from './third-party/apostille/apostille-core.mjs';
 import { signExample, verifyExample, addSpace, createReceiverExample, MAX_ARTIFACT_BYTES, MAX_BUNDLE_BYTES } from './apostille-example.mjs';
 
 const original = new Uint8Array(await readFile(new URL('../examples/agentic-demo-bundle.json', import.meta.url)));
@@ -20,6 +21,8 @@ test('real offline signatures retain producer-only scope and unknown trust witho
     assert.doesNotMatch(encoded, /"(?:seed|private_key|api_key)"/);
     const checked = await verifyExample(encoded, original);
     assert.equal(checked.signature_check, 'valid');
+    assert.equal(checked.protocol, 'https://ifandonlyif.io/apostille/spec/0.3');
+    assert.equal(checked.signature_algorithm, 'ML-DSA-65');
     assert.equal(checked.original_matches, true);
     assert.equal(checked.certificate_scope, 'producer_only');
     assert.equal(checked.issuer_trust, 'unknown');
@@ -111,4 +114,22 @@ test('receiver download kit has a real matching pair and a detectable changed or
   assert.equal(good.certificate_scope, 'producer_only');
   assert.equal(changed.signature_check, 'valid');
   assert.equal(changed.original_matches, false);
+});
+
+test('new examples are Core 0.3 ML-DSA-65 while a Core 0.1 Ed25519 bundle still verifies', async () => {
+  const bundle = JSON.parse(await signExample(original));
+  for (const envelope of [bundle.statement, bundle.delegation, bundle.acceptance]) {
+    assert.equal(envelope.protocol, 'https://ifandonlyif.io/apostille/spec/0.3');
+    assert.equal(envelope.signature.algorithm, 'ML-DSA-65');
+  }
+  const admin = await importKeyFile(await generateKeyFile({ algorithm: 'Ed25519' }));
+  const agent = await importKeyFile(await generateKeyFile({ algorithm: 'Ed25519' }));
+  const registration = await createRegistration(admin, agent, 'urn:example:witness:apostille');
+  const statement = await createStatement(original, 'application/octet-stream', agent, registration);
+  const legacy = canonical({ protocol: PROTOCOL, statement, ...registration, certificate: null });
+  const checked = await verifyExample(legacy, original);
+  assert.equal(checked.protocol, PROTOCOL);
+  assert.equal(checked.signature_algorithm, 'Ed25519');
+  assert.equal(checked.original_matches, true);
+  assert.equal((await verifyExample(legacy, addSpace(original))).original_matches, false);
 });

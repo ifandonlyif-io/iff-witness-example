@@ -1,6 +1,6 @@
 import {
-  PROTOCOL, MAX_INPUT_BYTES, b64, canonical, fingerprint, createRegistration,
-  createStatement, verifyArtifact, verifyBundle,
+  MAX_INPUT_BYTES, canonical, createRegistration, createStatement, generateKeyFile,
+  importKeyFile, verifyArtifact, verifyBundle,
 } from './third-party/apostille/apostille-core.mjs';
 
 export const MAX_ARTIFACT_BYTES = 1024 * 1024;
@@ -15,10 +15,10 @@ function artifactBytes(bytes) {
 }
 
 async function ephemeralSigner() {
-  // No seed export, key file, persistence, account registration or hosted call.
-  const pair = await crypto.subtle.generateKey('Ed25519', false, ['sign', 'verify']);
-  const publicKey = b64(new Uint8Array(await crypto.subtle.exportKey('raw', pair.publicKey)));
-  return { key: pair.privateKey, publicKey, keyID: await fingerprint(publicKey) };
+  // A fresh ML-DSA-65 key (Apostille Core 0.3, the default). The seed lives only
+  // in this call: no key file is written or returned, and there is no
+  // persistence, account registration or hosted call.
+  return importKeyFile(await generateKeyFile());
 }
 
 export async function signExample(bytes) {
@@ -29,7 +29,7 @@ export async function signExample(bytes) {
   const agent = await ephemeralSigner();
   const registration = await createRegistration(admin, agent, 'urn:example:witness:apostille');
   const statement = await createStatement(original, 'application/octet-stream', agent, registration);
-  return canonical({ protocol: PROTOCOL, statement, ...registration, certificate: null }) + '\n';
+  return canonical({ protocol: statement.protocol, statement, ...registration, certificate: null }) + '\n';
 }
 
 export async function verifyExample(bundleText, bytes) {
@@ -41,6 +41,8 @@ export async function verifyExample(bundleText, bytes) {
   const result = await verifyBundle(bundleText, { at: new Date() });
   return {
     signature_check: 'valid',
+    protocol: result.protocol,
+    signature_algorithm: JSON.parse(bundleText).statement.signature.algorithm, // already validated by verifyBundle
     original_matches: await verifyArtifact(result, original),
     certificate_scope: result.certificate_scope,
     issuer_trust: result.issuer_trust,

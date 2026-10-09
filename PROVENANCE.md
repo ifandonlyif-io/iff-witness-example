@@ -24,8 +24,8 @@ Three small packages are adapted from IFF's own verification logic — the
 part of IFF's stack that's designed to be independently re-derivable by
 anyone, as distinct from the operational service that produces it:
 
-- **`receipt/`** — the IFF Service Receipt v1 envelope: Ed25519 signing and
-  verification, canonical JSON validation, issuer/nonce/timestamp checks.
+- **`receipt/`** — the IFF Service Receipt envelope: v2 (ML-DSA-65) signing and verification, plus v1 (Ed25519) verification of historical receipts; from the public reference `iff-x402-transparency/go/receipt`. Canonical JSON
+  validation, issuer/nonce/timestamp checks.
   No database dependency, no proprietary business logic — a signature
   format meant to be checked by people who aren't IFF. IFF also publishes an
   independent SDK covering the same receipt format at
@@ -67,7 +67,7 @@ for exactly the fields it reads (see the `evidenceCard` type in
 
 ## Apostille example addition (2026-09-23)
 
-The separate offline Apostille walkthrough was added after the original Witness extraction. It uses the public `iff-apostille` release `v0.1.0-alpha.1` (commit `d2c72c8b323a4bcd8f107c1b917209fecccbde0f`), not private hosted code. The unchanged Core and strict-JSON modules, source paths, SHA-256 pins and license are in `client/third-party/apostille/`. This protocol code predates the example and is not new Witness cryptography. `npm run build` verifies the pinned copies and includes their MIT notice in the separate browser bundle.
+The separate offline Apostille walkthrough was added after the original Witness extraction. It uses the public `iff-apostille` release `v0.4.0-alpha.1` (commit `a33ea7049791cad731ddc9519e76fa22f6893879`), not private hosted code. The unchanged Core modules and vendored Noble sources, source paths, SHA-256 pins and license are in `client/third-party/apostille/`. This protocol code predates the example and is not new Witness cryptography. `npm run build` verifies the pinned copies and includes their MIT notice in the separate browser bundle.
 
 The example signs the exact public rehearsal fixture or user-selected local bytes, keeps keys in memory, and never issues a hosted certificate or changes an inner proof. See [the walkthrough](examples/APOSTILLE.md).
 

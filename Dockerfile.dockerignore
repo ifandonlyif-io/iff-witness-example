@@ -21,12 +21,25 @@
 
 # Browser build inputs, including the shared standalone receipt verifier.
 !web/service-receipt.mjs
+!web/ml-dsa-65.mjs
+!web/vendor/
+!web/vendor/noble/
+!web/vendor/noble/*
+!web/vendor/noble/*/
+!web/vendor/noble/*/*.js
+!web/vendor/noble/curves/abstract/*.js
 !package.json
 !package-lock.json
 !client/*.mjs
 !scripts/build.mjs
 !scripts/check-apostille-source.mjs
 !client/third-party/apostille/*.mjs
+!client/third-party/apostille/vendor/
+!client/third-party/apostille/vendor/noble/
+!client/third-party/apostille/vendor/noble/*
+!client/third-party/apostille/vendor/noble/*/
+!client/third-party/apostille/vendor/noble/*/*.js
+!client/third-party/apostille/vendor/noble/curves/abstract/*.js
 !client/third-party/apostille/LICENSE
 !client/third-party/apostille/SOURCE.json
 

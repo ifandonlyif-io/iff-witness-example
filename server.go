@@ -26,7 +26,7 @@ import (
 	"github.com/ifandonlyif-io/iff-witness-example/util"
 )
 
-//go:embed web/*
+//go:embed all:web
 var webFiles embed.FS
 
 type Server struct {
@@ -105,6 +105,14 @@ type ComputeBundle struct {
 	RouterTEEVerified *bool         `json:"router_tee_verified,omitempty"`
 	Proof             *ComputeProof `json:"proof,omitempty"`
 	Error             string        `json:"error,omitempty"`
+}
+
+func init() {
+	// Module scripts need a JavaScript MIME type under nosniff; do not rely on
+	// the host's mime.types.
+	for _, extension := range []string{".js", ".mjs"} {
+		_ = mime.AddExtensionType(extension, "text/javascript; charset=utf-8")
+	}
 }
 
 func NewServer(config Config) (*Server, error) {
@@ -379,7 +387,7 @@ func (s *Server) check(ctx context.Context, input CheckRequest) (Bundle, error) 
 		return Bundle{}, err
 	}
 	request := serviceRequest{URL: example.URL, PaymentRequired: payment}
-	request.Receipt.Version = "1"
+	request.Receipt.Version = "2"
 	request.Receipt.Nonce = input.Nonce
 	id := make([]byte, 16)
 	if _, err := rand.Read(id); err != nil {
@@ -482,7 +490,7 @@ func (s *Server) rehearsalResponse(input CheckRequest, request serviceRequest, p
 	}
 	result["service_receipt"] = envelope
 	raw, err := json.Marshal(result)
-	keys, _ := json.Marshal(map[string]any{"schema": "https://ifandonlyif.io/schemas/service-receipt-key-directory-v1.json", "issuer": demoIssuer, "enabled": true, "simulated": true, "keys": []any{map[string]string{"key_id": s.signer.KeyID(), "algorithm": "Ed25519", "public_key": s.signer.PublicKeyBase64URL(), "purpose": "service-receipt-signing", "status": "current"}}})
+	keys, _ := json.Marshal(map[string]any{"schema": receipt.KeyDirectorySchemaV2, "issuer": demoIssuer, "enabled": true, "simulated": true, "keys": []any{map[string]string{"key_id": s.signer.KeyID(), "algorithm": receipt.AlgorithmMLDSA65, "public_key": s.signer.PublicKeyBase64URL(), "purpose": "service-receipt-signing", "status": "current"}}})
 	return raw, keys, err
 }
 
@@ -546,6 +554,7 @@ func (s *Server) liveIFF(ctx context.Context, request serviceRequest, trustedPin
 
 func trustedDirectoryKeys(raw []byte, issuer string, pins []string) ([]string, error) {
 	var directory struct {
+		Schema  string `json:"schema"`
 		Issuer  string `json:"issuer"`
 		Enabled bool   `json:"enabled"`
 		Keys    []struct {
@@ -556,13 +565,16 @@ func trustedDirectoryKeys(raw []byte, issuer string, pins []string) ([]string, e
 			Status    string `json:"status"`
 		} `json:"keys"`
 	}
-	if receipt.ValidateUniqueJSON(raw) != nil || json.Unmarshal(raw, &directory) != nil || directory.Issuer != issuer || !directory.Enabled {
+	if receipt.ValidateUniqueJSON(raw) != nil || json.Unmarshal(raw, &directory) != nil || directory.Schema != receipt.KeyDirectorySchemaV2 || directory.Issuer != issuer || !directory.Enabled {
 		return nil, errors.New("invalid directory")
 	}
 	ids := []string{}
 	for _, key := range directory.Keys {
 		parsed, err := receipt.ParsePublicKey(key.PublicKey)
-		if err != nil || parsed.KeyID != key.KeyID || key.Algorithm != "Ed25519" || key.Purpose != "service-receipt-signing" || (key.Status != "current" && key.Status != "previous") {
+		// New receipts are ML-DSA-65 only. A previous Ed25519 key in the
+		// directory is never trusted for them, and the declared algorithm
+		// must equal the one implied by the public key length.
+		if err != nil || parsed.KeyID != key.KeyID || parsed.Algorithm != receipt.AlgorithmMLDSA65 || key.Algorithm != parsed.Algorithm || key.Purpose != "service-receipt-signing" || (key.Status != "current" && key.Status != "previous") {
 			continue
 		}
 		if len(pins) > 0 {

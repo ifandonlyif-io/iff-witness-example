@@ -49,7 +49,7 @@ npm start
 
 Open **http://127.0.0.1:8094**. The conditional copy preserves an existing `.env`; on a fresh clone it selects the included public fixture without adding a key. `npm start` reads only this directory's optional `.env`; `go run ./cmd/witness` reads the process environment directly. Browser assets are embedded into the Go binary, so rebuild/restart after editing them. No PostgreSQL, Redis, wallet, or production signing key is needed.
 
-The default **rehearsal** mode makes no outbound request. It creates a real Ed25519 signature using a newly generated, process-local demo key. The signed issuer is `https://witness.example`, the endpoint and observations are simulated, the explanation is fixed text, and all 0G/AgenticID proof indicators remain unverified. A rehearsal is not a qualifying live 0G integration.
+The default **rehearsal** mode makes no outbound request. It creates a real ML-DSA-65 (Service Receipt v2) signature using a newly generated, process-local demo key. The signed issuer is `https://witness.example`, the endpoint and observations are simulated, the explanation is fixed text, and all 0G/AgenticID proof indicators remain unverified. A rehearsal is not a qualifying live 0G integration.
 
 ## Enable real IFF + 0G
 
@@ -110,7 +110,7 @@ No live request should be claimed until an actual funded call and its returned a
 |---|---|
 | `compute.go` | Calls `https://router-api.0g.ai/v1/chat/completions`; supplies verified IFF signed subject; retains exact HTTP request/response JSON, provider and `ZG-Res-Key`. |
 | `proofs.go` | Reads 0G mainnet service registry at a fixed block through the configured official RPC, fetches the provider signature, recovers EIP-191 signer, compares exact request/response SHA-256 digests. |
-| `client/verify.mjs` | Local IFF Ed25519 verification, C1 fingerprint recomputation, evidence-to-prompt binding, model consistency, output matching and raw provider proof verification. |
+| `client/verify.mjs` | Local IFF Service Receipt verification (v2 ML-DSA-65; historical v1 Ed25519 bundles still verify), C1 fingerprint recomputation, evidence-to-prompt binding, model consistency, output matching and raw provider proof verification. |
 | `client/agentic.mjs` | Optional offline X-Agent-Proof signature and HTTP transcript verification with external identity/domain pins. |
 | `client/agent-bundle.mjs` | Binds the signed Agent HTTP route, request and entire response to the displayed Witness bundle; rejects swapped explanations or evidence. |
 | `agentic/register-service.mjs` | Registers the loopback Go API inside an **existing** 0G Sealed Sandbox; it neither mints nor funds/deploys an agent. |
@@ -133,7 +133,7 @@ npm run verify -- /absolute/path/to/bundle.json /absolute/path/to/trusted-policy
 
 The separate policy file can contain `expectedIssuer`, `trustedKeyIDs`, `expectedNonce`, `trustedComputeSigners` (provider-address-to-signer map), and `agentic` (`expectedSigner`, `chainId`, `contractAddress`). Omitting it leaves identities unverified. Exit code 1 means a failed check; 2 means unreadable/invalid input. **Exit code 0 means only that no check failed, not that every claim is verified**; inspect the individual states.
 
-A ready-to-use policy file is committed at `examples/trusted-policy.json`, pinning IFF's published production signing key and the AgenticID demo signer described below. Download a **live-mode** bundle from this app and immediately run `npm run verify -- your-bundle.json examples/trusted-policy.json` with no setup. Rehearsal-mode bundles intentionally cannot be pinned this way: the demo signing key is freshly generated in process memory on every restart, so `iff_issuer` correctly stays `unverified` for a rehearsal bundle checked against this file. IFF's signing key can rotate; re-fetch `https://ifandonlyif.io/api/v3/receipts/keys` if this stops matching.
+A ready-to-use policy file is committed at `examples/trusted-policy.json`, pinning IFF's current ML-DSA-65 production receipt key (`sha256:70be5c7a…c217`) and the AgenticID demo signer described below. Download a **live-mode** bundle from this app and immediately run `npm run verify -- your-bundle.json examples/trusted-policy.json` with no setup. Rehearsal-mode bundles intentionally cannot be pinned this way: the demo signing key is freshly generated in process memory on every restart, so `iff_issuer` correctly stays `unverified` for a rehearsal bundle checked against this file. IFF's signing key can rotate; re-fetch `https://ifandonlyif.io/api/v3/receipts/keys` if this stops matching.
 
 ## AgenticID / X-Agent-Proof demo (offline test vector)
 
@@ -165,7 +165,7 @@ See [optional AgenticID integration](../agentic/README.md) for sealed service re
 
 ## Isolation and deployment
 
-Service Receipt v1 `compute_proof` semantics remain unchanged from IFF's own definition. Optional 0G claims apply only to the evidence actually verified here, never to IFF's original probe execution. The current runtime is Go plus browser JavaScript; Deno Deploy adaptation has not been implemented.
+Service Receipt `compute_proof` semantics (v1 and v2) remain as defined by IFF. Optional 0G claims apply only to the evidence actually verified here, never to IFF's original probe execution. The current runtime is Go plus browser JavaScript; Deno Deploy adaptation has not been implemented.
 
 For a separate service, build from the repository root using `Dockerfile`, set `WITNESS_LISTEN_ADDR=0.0.0.0:8094` and `WITNESS_PUBLIC_ORIGIN` to its real HTTPS origin, and configure the platform to route to port 8094. Mount the example file read-only and supply the key through the host's secret settings.
 

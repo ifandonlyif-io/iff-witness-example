@@ -13,6 +13,6 @@ await build({
   absWorkingDir: root, entryPoints: ['client/apostille-demo.mjs'], outdir: 'web',
   bundle: true, format: 'esm', platform: 'browser', target: ['es2022'],
   loader: { '.json': 'text' },
-  banner: { js: '/*! Apostille Core 0.1 · v0.1.0-alpha.1\n' + apostilleLicense + '*/' },
+  banner: { js: '/*! Apostille Core 0.3 (verifies 0.1–0.3) · v0.4.0-alpha.1\n' + apostilleLicense + '*/' },
   minify: true, legalComments: 'eof', logLevel: 'info',
 });

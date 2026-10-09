@@ -46,6 +46,12 @@ type IFFVerification struct {
 
 // projection must be derived from the submitted request, never the untrusted
 // HTTP response. The backend uses the production x402 parser/fingerprinter.
+// receiptClockSkew absorbs ordinary network/server clock drift between IFF's
+// issuedAt stamp and Witness's own clock at verification time. It does not
+// widen IFF's receipt validity window (that stays whatever IFF issued); it
+// only tolerates the two clocks disagreeing by a small, fixed amount.
+const receiptClockSkew = 30 * time.Second
+
 func verifyIFFResponse(raw, projection []byte, nonce, expectedIssuer string, trustedKeyIDs []string, now time.Time) (IFFVerification, error) {
 	result := IFFVerification{}
 	if len(raw) > 256<<10 || receipt.ValidateUniqueJSON(raw) != nil || receipt.ValidateUniqueJSON(projection) != nil {
@@ -59,7 +65,7 @@ func verifyIFFResponse(raw, projection []byte, nonce, expectedIssuer string, tru
 	if !ok {
 		return result, errors.New("IFF did not return a service receipt")
 	}
-	verified, err := receipt.VerifyJSON(envelope, receipt.VerifyOptions{ExpectedIssuer: expectedIssuer, TrustedKeyIDs: trustedKeyIDs, Now: now})
+	verified, err := receipt.VerifyJSON(envelope, receipt.VerifyOptions{ExpectedIssuer: expectedIssuer, TrustedKeyIDs: trustedKeyIDs, Now: now, ClockSkew: receiptClockSkew})
 	if err != nil {
 		return result, fmt.Errorf("IFF receipt: %w", err)
 	}

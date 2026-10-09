@@ -61,6 +61,11 @@ func TestProofIFFReceiptBindings(t *testing.T) {
 	if err != nil || !base.OuterBound || len(base.Subject) == 0 {
 		t.Fatalf("valid fixture rejected: %+v %v", base, err)
 	}
+	// A receipt issued slightly ahead of this host's clock stays fresh within
+	// the tolerated skew; production IFF stamps microsecond-precision times.
+	if v, err := verify(raw, projection, "fixture-request-1", "https://witness.example", []string{signer.KeyID()}, now.Add(-time.Second)); err != nil || !v.Fresh {
+		t.Fatalf("receipt within clock skew rejected: %+v %v", v, err)
+	}
 	tests := []struct {
 		name            string
 		raw, projection []byte
@@ -74,8 +79,8 @@ func TestProofIFFReceiptBindings(t *testing.T) {
 		{"foreign issuer", raw, projection, "fixture-request-1", "https://ifandonlyif.io", []string{signer.KeyID()}, now},
 		{"nonce replay", raw, projection, "different-request", "https://witness.example", []string{signer.KeyID()}, now},
 		{"projection substitution", raw, []byte(`{"url":"https://other.example/"}`), "fixture-request-1", "https://witness.example", []string{signer.KeyID()}, now},
-		{"expired", raw, projection, "fixture-request-1", "https://witness.example", []string{signer.KeyID()}, now.Add(5 * time.Minute)},
-		{"future", raw, projection, "fixture-request-1", "https://witness.example", []string{signer.KeyID()}, now.Add(-time.Second)},
+		{"expired", raw, projection, "fixture-request-1", "https://witness.example", []string{signer.KeyID()}, now.Add(5*time.Minute + receiptClockSkew + time.Second)},
+		{"future", raw, projection, "fixture-request-1", "https://witness.example", []string{signer.KeyID()}, now.Add(-(receiptClockSkew + time.Second))},
 		{"duplicate keys", []byte(strings.Replace(string(raw), `"verdict":"consistent"`, `"verdict":"diverged","verdict":"consistent"`, 1)), projection, "fixture-request-1", "https://witness.example", []string{signer.KeyID()}, now},
 	}
 	for _, test := range tests {
